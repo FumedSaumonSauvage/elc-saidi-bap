@@ -30,13 +30,7 @@ Ce problème peut être abordé à l'aide d'un système de colonies de fourmis m
 *   **Répartition des arrêts entre les lignes :** Il est important de s'assurer que les différentes lignes de bus ne desservent pas exactement les mêmes arrêts.
 *   **Calcul du temps de trajet moyen :** Le calcul du temps de trajet moyen peut être complexe, car il nécessite de prendre en compte les temps de trajet entre les arrêts et les temps d'attente aux arrêts.
 
-## Solutions potentielles
+## Solutions préliminaires potentielles
 
 *   **Clustering des arrêts :** Les arrêts de bus peuvent être regroupés en fonction de critères géographiques, temporels, etc.
 *   **Utilisation d'un arbre couvrant minimal (MST) :** Un MST peut être construit pour représenter les connexions entre les arrêts, puis divisé en sous-arbres pour former les itinéraires des lignes de bus.
-
-## Conclusion
-
-Le Bus Allocation Problem est un problème complexe qui peut être résolu à l'aide d'un système de colonies de fourmis multiples. L'approche MACS permet de prendre en compte les spécificités de chaque ligne de bus et de trouver des solutions optimisées pour minimiser le temps de trajet moyen des passagers.
-
-N'hésitez pas à poser d'autres questions si vous souhaitez approfondir certains aspects du problème ou des solutions potentielles.
