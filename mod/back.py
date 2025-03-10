@@ -1,7 +1,8 @@
-# Backend, fichier principale- de logique
+# Backend, fichier principal de logique
 
 import numpy as np
 import tkinter.messagebox as tkm
+from tkinter import StringVar
 from tkinter.filedialog import asksaveasfile, askopenfile
 import math
 import json
@@ -14,6 +15,7 @@ class LogiqueMetier:
         self.debut_arc = None  # Id nœud de départ
         self.arc_temporaire = None  # Id arc temp
         self.mode = "noeud"
+        self.nombre_colonies = None # PLus tard, devient un objet stringvar
 
     # Des ptits getter-setter pour Brams <3
     def set_mode_noeud(self):
@@ -21,6 +23,9 @@ class LogiqueMetier:
 
     def set_mode_arc(self):
         self.mode = "arc"
+
+    def setStringVar(self, objet):
+        self.nombre_colonies = objet
 
     def is_mode_arc(self):
         return self.mode == "arc"
@@ -81,6 +86,9 @@ class LogiqueMetier:
         for arc_id in self.canvas.find_withtag("arc"):  # On tag les arcs (voir juste apres) pour ne pas effacer les noeuds
             self.canvas.delete(arc_id)
 
+        print(self.noeuds)
+        print(self.arcs)
+
         for noeud1, noeud2 in self.arcs:
             x1, y1 = self.noeuds[noeud1]
             x2, y2 = self.noeuds[noeud2]
@@ -110,14 +118,23 @@ class LogiqueMetier:
         if fichier is None:
             return
         graphe = json.load(fichier)
-        self.noeuds = graphe["noeuds"]
-        self.arcs = graphe["arcs"]
+        self.noeuds = {int(id_noeud): (x, y) for id_noeud, (x, y) in graphe["noeuds"].items()}
+        self.arcs = [tuple(arc) for arc in graphe["arcs"]]
         self.afficher_noeuds()
-        self.afficher_arcs() # TODO: voir pourquoi c'est pété
+        self.afficher_arcs()
         fichier.close()
 
 
-    def effacer_graphe  (self):
+    def effacer_graphe(self):
         self.canvas.delete("all")
         self.noeuds.clear()
         self.arcs.clear()
+
+
+    def run_optimisation(self):
+        # Lance l'optimisation lorsqu'on appuie sur le bouton OK
+        
+        # On vérifie qu'on a >0 colonies, et que le graphe est bien en un seul morceau
+
+        # attention, nombre_colonies est un stringvar!
+        pass

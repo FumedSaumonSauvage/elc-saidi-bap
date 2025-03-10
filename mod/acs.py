@@ -7,7 +7,7 @@ class AntColonySystem:
         """
         Initialise un système de colonie de fourmis pour une ligne de bus
         
-        :param graph: Le graphe sur lequel les fourmis se déplacent
+        :param graph: Le graphe sur lequel les fourmis se déplacent, de classe GraphBus (doit avoir les fonctions get_node exist_edge et get_travel_time implémentées)
         :param colony_id: Identifiant de la colonie
         :param alpha: Importance des phéromones
         :param beta: Importance de la visibilité (inverse du temps de parcours)
