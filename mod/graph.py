@@ -3,12 +3,11 @@ import numpy as np
 
 class BusGraph:
     # Classe qui décrit un graphe pour un bus en particulier
-    # L'ensemble des graphes des lignes (joints) forment le graphe global
+    # L'ensemble des graphes des lignes (joints) forme le graphe global
 
     def __init__(self):
         """
-            Initialise un graphe pour ce bus en particulier 
-            (il faudra l'étendre avec les autres graphes des autres bus pour ensuite pouvoir recouvrir le graphe global)
+            Initialise un graphe pour ce bus en particulier (ligne de bus)
         """
         self.noeuds = {}  # id: (x, y)
         self.arcs = []  # (id_noeud1, id_noeud2)
@@ -33,10 +32,13 @@ class BusGraph:
             self.arcs.append((node1, node2, temps_parcours))
             self.arcs.append((node2, node1, temps_parcours))  # --> Le graphe n'est pas orienté
     
-    def get_nodes(self):
-        return self.noeuds
+    def get_nodes(self): return self.noeuds
     
-    def get_travel_time(self, node1, node2): 
+    def get_travel_time(self, node1, node2):
+        """
+            Par construction, un arc entre deux noeuds est de la forme suivante :
+            (n1, n2, temps_parcours)
+        """ 
         # Convention, si l'arête n'existe pas, on retourne infini (pas fou de manipuler l'infini mais il peut y avoir des grandes distances)
         for arc in self.arcs:
             if arc[0] == node1 and arc[1] == node2:
@@ -46,22 +48,26 @@ class BusGraph:
     def exists_edge(self, node1, node2):
         return any(arc[0] == node1 and arc[1] == node2 for arc in self.arcs)
     
-    def from_dict(self, nodes_dict, arcs_list): # TODO : vérifier si cette fonction colle avec la définition des graphes comme dans back.py
+    def from_dict(self, nodes_dict, arcs_list):
         """
-            On crée le graphe à partir d'un dico : nodes_dict et d'une listes d'arêtes : arcs_list
+            On crée le graphe de la ligne de bus à partir d'un dico de noeuds et d'une liste d'arêtes
         """
         self.noeuds = {}
         self.arcs = []
 
         for node_id, (x, y) in nodes_dict.items():
             self.add_node(int(node_id), x, y)
-    
-        for node1, node2 in arcs_list:
-            self.add_edge(node1, node2)
+
+        # Attention à la convention de l'arête : (node1, node2, tps_parcours)
+        for node1, node2, tps_parcours in arcs_list:
+            self.add_edge(node1, node2, tps_parcours)
+            self.add_edge(node2, node1, tps_parcours) 
+            # On fait un graphe non orienté. A discuter sur ce point là en particulier 
+            # mais je pense que c'est plus simple d'ajouter de la symétrie dans la recherche d'arcs de connexion entre deux noeuds
 
 class GlobalGraph:
     # Classe qui décrit le graphe global, c'est à dire l'ensemble des lignes de bus
-    # On peut donc considérer que c'est un graphe non orienté
+    # On peut donc considérer que c'est un graphe non orienté. Il contient ainsi 
 
     def __init__(self):
         """
@@ -71,18 +77,21 @@ class GlobalGraph:
     
     def add_graph(self, line_id, bus_graph):
         """
-            Ajoute un graphe de ligne au graphe global
+            Ajoute le graphe de la ligne de bus ligne_id au graphe global
         """
         self.graphes[line_id] = bus_graph
     
     def get_nodes(self):
+        """
+            Retourne les noeuds parcourus par chaque ligne de bus.
+        """
         return {line_id: bus_graph.get_nodes() for line_id, bus_graph in self.graphes.items()}
     
     def get_travel_time(self, node1, node2):
         """
             Retourne le temps de parcours entre deux nœuds
         """
-        # On cherche le temps de parcours le plus court entre les deux nœuds
+        # On cherche le temps de parcours le plus court entre les deux nœuds parmi tous les chemins des différentes lignes de bus qui relient ces deux noeuds
         travel_times = []
         for _, bus_graph in self.graphes.items():
             travel_times.append(bus_graph.get_travel_time(node1, node2))
@@ -91,16 +100,22 @@ class GlobalGraph:
     
     def exists_edge(self, node1, node2):
         """
-            Vérifie si une arête existe entre deux nœuds
+            Vérifie si une arête existe entre deux nœuds dans le graphe global (ie : il existe au moins une ligne de bus qui relie les deux noeuds)
         """
         return any(bus_graph.exists_edge(node1, node2) for _, bus_graph in self.graphes.items())
     
     def from_dict(self, graph_dict):
         """
-            On crée le graphe global à partir d'un dico : graph_dict
+            On crée le graphe global à partir d'un dico : graph_dict qui contient :
+                - les noms des lignes de bus
+                - les dicos des noeuds de chaque ligne
+                - les listes d'arêtes de chaque ligne
         """
         self.graphes = {}
         for line_id, (nodes_dict, arcs_list) in graph_dict.items():
             bus_graph = BusGraph()
             bus_graph.from_dict(nodes_dict, arcs_list)
             self.add_graph(line_id, bus_graph)
+
+
+# Comment faire si il existe des noeuds dans le graphe global qui ne sont pas reliés par une ligne de bus ?

@@ -50,10 +50,6 @@ class optimizer:
         """
         self.global_graph.from_dict(graph_dict)
 
-
-    
-
-
     # Test de l'efficacité de la solution du problème
     def test_efficacite():
         # On veut deux choses:
