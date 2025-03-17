@@ -6,6 +6,10 @@ Intervenant: Alexandre Saïdi
 
 ## Compréhension du problème
 
+Le graphe sur lequel on circule est pondéré: à chaque arête, on associe un temps de parcours sur cette arête. Notre problème est le suivant: sachant que l'on a à disposition `k` lignes de bus, comment les agencer pour diminiuer le temps de trajet moyen entre deux points choisis aléatoirement? 
+On modélisera le graphe suivant la logique `route = arête`, et `arrêt de bus = noeud`.
+Pour cela, on considèrera dans nos hypothèses de fonctionnement que le voyageur peut changer de ligne de bus dès qu'il le souhaite, pourvu qu'il soit à un arrêt ou passe une autre ligne. Il n'y a pas de modélisation du temps d'attente, on considèrera le monde parfait au niveau de la coordination des bus.
+
 Entrée: un graphe, dont les arcs sont des routes et les noeuds sont des arrêts. De plus, on fournit un nombre k de lignes de bus pouvant circuler sur le graphe.
 
 Sortie: Une optimisation du trajet pour chaque ligne de bus, de manière à minimiser le temps de trajet moyen d'un point à l'autre du graphe.
