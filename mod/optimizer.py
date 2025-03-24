@@ -44,6 +44,18 @@ class optimizer:
         """
         self.lignes_bus[id] = BusGraph(id, arrets)
 
+    def get_ligne_bus(self, id):
+        """
+            Retourne la ligne de bus id
+        """
+        return self.lignes_bus[id]
+
+    def get_all_lignes_bus(self):
+        """
+            Retourne toutes les lignes de bus
+        """
+        return self.lignes_bus
+
     def charger_graphe(self, graph_dict):
         """
             Charge le graphe global à partir d'un dictionnaire
