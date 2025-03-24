@@ -92,9 +92,8 @@ class Ant:
         self.id_fourmi = id_fourmi
         self.visites = {noeud_initial: True}
         self.a_visiter = set()
-        self.id = id_fourmi
         self.colonie = colonie
-        self.pheromones = {}
+        self.pheromones = {} # TODO : formaliser
 
     def voisins(self):
         return self.colonie.graph.get_contingent_nodes(self.noeud_actuel)
@@ -126,7 +125,7 @@ class Ant:
                         max_val = val
                         next_node = node
             return next_node
-        else:  # Exploration
+        else:  # Exploration -> return random
             total = 0
             probabilities = {}
             for node in self.a_visiter:
@@ -157,7 +156,7 @@ class Ant:
     def deplacement(self):
         while self.a_visiter and not self.objectif:
             # On choisit le prochain noeud à visiter
-            self.noeud_actuel = self.choix_node()
+            self.noeud_actuel = self.choix_noeud()
             self.a_visiter = self.voisins()
             self.visites[self.noeud_actuel] = True
             self.objectif = self.noeud_actuel == self.noeud_cible
@@ -166,5 +165,6 @@ class Ant:
         # On ne dépose de phéromone que sur un chemin pour lequel on a atteint l'objectif
         if self.objectif:
             # On dépose la quantité de phéromones attribué pour chaque fourmi de manière proportionnelle à la distance parcourue entre chaque noeud
+            # TODO : formaliser les phéromones
             pass
 

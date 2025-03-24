@@ -157,13 +157,24 @@ class LogiqueMetier:
             self.canvas.create_line(pos_legende[0], pos_legende[1] + i*20, pos_legende[0] + 20, pos_legende[1] + i*20, fill=couleurs[i], width=2)
             self.canvas.create_text(pos_legende[0] + 30, pos_legende[1] + i*20, text="Ligne " + str(lignes[i]), anchor="w")
 
+    def verifier_graphe(self): # TODO : terminer la dfs
+        # verifie si le graphe est bien connexe
+        
+        nodes_cp = self.noeuds.copy()
+        arcs_cp = self.arcs.copy()
+        
 
     def run_optimisation(self, debug = True):
         # Lance l'optimisation lorsqu'on appuie sur le bouton OK
         
         # On vérifie qu'on a >0 colonies, et que le graphe est bien en un seul morceau
-
         # attention, nombre_colonies est un stringvar!
+
+        if int(self.nombre_colonies.get()) <= 0:
+            tkm.showerror("Erreur", "Nombre de colonies invalide")
+            return
+        
+
 
         if debug: # Méthode d'optimisation: le hasard. On pose 3 lignes de bus dans le pif le plus total, juste pour voir si l'IG fonctionne.
             print("DEBUG: nombre de colonies:", self.nombre_colonies.get())
@@ -200,3 +211,4 @@ class LogiqueMetier:
             self.afficher_legende([ligne_bus.color, ligne_bus_2.color], [1, 2])
 
         pass
+
