@@ -1,5 +1,5 @@
 # Classe qui gère toute l'organisation du problème d'optimisation. C'est un singleton, et regroupe les différentes classes qui composent le problème.
-
+import numpy as np
 from mod.graph import GlobalGraph, BusGraph
 from mod.acs import AntColonySystem
 
@@ -49,6 +49,23 @@ class optimizer:
             Charge le graphe global à partir d'un dictionnaire
         """
         self.global_graph.from_dict(graph_dict)
+
+    def calcul_matrice_distance(self, noeuds):
+        """
+            Calcule la matrice des distances entre les noeuds du graphe global
+            Structure des noeuds: {id_noeud: (x, y)}
+
+            return {id_noeud1: {id_noeud2: distance(id_noeud1, id_noeud2) for id_noeud2 in noeuds} for id_noeud1 in noeuds}
+        """
+        self.distances = {}
+        for id_noeud1, (x1, y1) in noeuds.items():
+            self.distances[id_noeud1] = {}
+            for id_noeud2, (x2, y2) in noeuds.items():
+                if id_noeud1 != id_noeud2:
+                    # On fait l'hypothèse que le temps de parcours est proportionnel à la distance euclidienne car les fourmis se déplacent à vitesse constante
+                    self.distances[id_noeud1][id_noeud2] = np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+        return self.distances
+    
 
     # Test de l'efficacité de la solution du problème
     def test_efficacite():
