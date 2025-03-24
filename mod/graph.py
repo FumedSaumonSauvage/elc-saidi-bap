@@ -66,37 +66,17 @@ class BusGraph:
             # mais je pense que c'est plus simple d'ajouter de la symétrie dans la recherche d'arcs de connexion entre deux noeuds
 
 class GlobalGraph:
-    # Classe qui décrit le graphe global, c'est à dire l'ensemble des lignes de bus
-    # On peut donc considérer que c'est un graphe non orienté. Il contient ainsi 
+    # Classe qui décrit le graphe global "vierge" (sans les lignes de bus)
+    # On peut donc considérer que c'est un graphe non orienté.
 
-    def __init__(self):
+    def __init__(self, nodes, arcs):
         """
             Initialise le graphe global
+            nodes: format {id_noeud: (x, y)}
+            arcs: format [(id_noeud1, id_noeud2, temps_parcours)]
         """
-        self.graphes = {}  # id_ligne: BusGraph
-    
-    def add_graph(self, line_id, bus_graph):
-        """
-            Ajoute le graphe de la ligne de bus ligne_id au graphe global
-        """
-        self.graphes[line_id] = bus_graph
-    
-    def get_nodes(self):
-        """
-            Retourne les noeuds parcourus par chaque ligne de bus.
-        """
-        return {line_id: bus_graph.get_nodes() for line_id, bus_graph in self.graphes.items()}
-    
-    def get_travel_time(self, node1, node2):
-        """
-            Retourne le temps de parcours entre deux nœuds
-        """
-        # On cherche le temps de parcours le plus court entre les deux nœuds parmi tous les chemins des différentes lignes de bus qui relient ces deux noeuds
-        travel_times = []
-        for _, bus_graph in self.graphes.items():
-            travel_times.append(bus_graph.get_travel_time(node1, node2))
-        
-        return min(travel_times)
+        self.nodes = nodes
+        self.arcs = arcs 
     
     def exists_edge(self, node1, node2):
         """
@@ -117,5 +97,16 @@ class GlobalGraph:
             bus_graph.from_dict(nodes_dict, arcs_list)
             self.add_graph(line_id, bus_graph)
 
+    def are_arcs_contingent(self, arc1, arc2):
+        """
+            Vérifie si deux arcs sont contigus (ie : ils partagent un nœud en commun)
+        """
+        return arc1[0] == arc2[0] or arc1[0] == arc2[1] or arc1[1] == arc2[0] or arc1[1] == arc2[1]
+    
+    def get_contingent_nodes(self, noeud):
+        """
+            Retourne les noeuds contigus à un nœud donné
+        """
+        return [arc[0] if arc[1] == noeud else arc[1] for _, bus_graph in self.graphes.items() for arc in bus_graph.arcs if noeud in arc]
 
-# Comment faire si il existe des noeuds dans le graphe global qui ne sont pas reliés par une ligne de bus ?
+
