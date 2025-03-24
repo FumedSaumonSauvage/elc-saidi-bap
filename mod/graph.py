@@ -1,5 +1,6 @@
 import math
 import numpy as np
+from mod.idcooker import IdCooker
 
 class BusGraph:
     # Classe qui décrit un graphe pour un bus en particulier
@@ -9,8 +10,11 @@ class BusGraph:
         """
             Initialise un graphe pour ce bus en particulier (ligne de bus)
         """
+        self.id = IdCooker().generate_id()
         self.noeuds = {}  # id: (x, y)
         self.arcs = []  # (id_noeud1, id_noeud2)
+        couleur = np.random.randint(0, 256, size=3) # Couleur aleatoire
+        self.color = "#{:02x}{:02x}{:02x}".format(*couleur)
     
     def add_node(self, node_id, x, y):
         """
@@ -33,17 +37,8 @@ class BusGraph:
             self.arcs.append((node2, node1, temps_parcours))  # --> Le graphe n'est pas orienté
     
     def get_nodes(self): return self.noeuds
-    
-    def get_travel_time(self, node1, node2):
-        """
-            Par construction, un arc entre deux noeuds est de la forme suivante :
-            (n1, n2, temps_parcours)
-        """ 
-        # Convention, si l'arête n'existe pas, on retourne infini (pas fou de manipuler l'infini mais il peut y avoir des grandes distances)
-        for arc in self.arcs:
-            if arc[0] == node1 and arc[1] == node2:
-                return arc[2]
-        return float('inf')
+
+    def get_edges(self): return self.arcs
     
     def exists_edge(self, node1, node2):
         return any(arc[0] == node1 and arc[1] == node2 for arc in self.arcs)
@@ -64,12 +59,22 @@ class BusGraph:
             self.add_edge(node2, node1, tps_parcours) 
             # On fait un graphe non orienté. A discuter sur ce point là en particulier 
             # mais je pense que c'est plus simple d'ajouter de la symétrie dans la recherche d'arcs de connexion entre deux noeuds
+    
+    def to_dict(self):
+        """
+            Retourne le graphe de la ligne de bus sous forme de dictionnaire
+        """
+        return {
+            "noeuds": self.noeuds,
+            "arcs": self.arcs
+        }
+
 
 class GlobalGraph:
     # Classe qui décrit le graphe global "vierge" (sans les lignes de bus)
     # On peut donc considérer que c'est un graphe non orienté.
 
-    def __init__(self, nodes, arcs):
+    def __init__(self, nodes = None, arcs = None):
         """
             Initialise le graphe global
             nodes: format {id_noeud: (x, y)}
@@ -86,16 +91,10 @@ class GlobalGraph:
     
     def from_dict(self, graph_dict):
         """
-            On crée le graphe global à partir d'un dico : graph_dict qui contient :
-                - les noms des lignes de bus
-                - les dicos des noeuds de chaque ligne
-                - les listes d'arêtes de chaque ligne
+        Cree le graphe global à partir d'un dictionnaire contenant les noeuds et les arcs
         """
-        self.graphes = {}
-        for line_id, (nodes_dict, arcs_list) in graph_dict.items():
-            bus_graph = BusGraph()
-            bus_graph.from_dict(nodes_dict, arcs_list)
-            self.add_graph(line_id, bus_graph)
+        self.nodes = graph_dict["noeuds"]
+        self.arcs = graph_dict["arcs"]
 
     def are_arcs_contingent(self, arc1, arc2):
         """
@@ -103,10 +102,5 @@ class GlobalGraph:
         """
         return arc1[0] == arc2[0] or arc1[0] == arc2[1] or arc1[1] == arc2[0] or arc1[1] == arc2[1]
     
-    def get_contingent_nodes(self, noeud):
-        """
-            Retourne les noeuds contigus à un nœud donné
-        """
-        return [arc[0] if arc[1] == noeud else arc[1] for _, bus_graph in self.graphes.items() for arc in bus_graph.arcs if noeud in arc]
-
+   
 

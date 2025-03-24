@@ -1,51 +1,103 @@
 @startuml projet_bap
 
-class Application {
-    - root: tk.Tk
-    - interface: InterfaceUtilisateur
-    - logique: LogiqueMetier
-    + __init__()
+
+package tk{
+    class Application {
+        - root: tk.Tk
+        - interface: InterfaceUtilisateur
+        - logique: LogiqueMetier
+        + __init__()
+    }
 }
 
-class InterfaceUtilisateur {
-    - master: tk.Tk
-    + canvas: tk.Canvas
-    + toolbar_frame: tk.Frame
-    + bouton_noeud: tk.Button
-    + bouton_arc: tk.Button
-    + bouton_effacer: tk.Button
-    + bouton_sauvegarder: tk.Button
-    + bouton_charger: tk.Button
-    + __init__(master: tk.Tk)
+class main{
+    + main()
 }
 
-class LogiqueMetier {
-    - canvas: tk.Canvas
-    - noeuds: dict
-    - arcs: list
-    - debut_arc: int
-    - arc_temporaire: int
-    - mode: str
-    + __init__(canvas: tk.Canvas)
-    + set_mode_noeud()
-    + set_mode_arc()
-    + is_mode_arc() : bool
-    + is_mode_noeud() : bool
-    + clic_canvas(event)
-    + ajouter_noeud(event)
-    + dessiner_arc(event)
-    + trouver_noeud_plus_proche(x: int, y: int) : int
-    + afficher_arcs()
-    + afficher_noeuds()
-    + sauvegarder()
-    + charger_graphe()
-    + effacer_graphe()
+package mod{
+
+    class IdCooker{
+        + _instance: IdCooker
+        - __new__()
+        - __init__()
+        + generate_id()
+    }
+
+    class InterfaceUtilisateur {
+        - master: tk.Tk
+        + canvas: tk.Canvas
+        + toolbar_frame: tk.Frame
+        + bouton_noeud: tk.Button
+        + bouton_arc: tk.Button
+        + bouton_effacer: tk.Button
+        + bouton_sauvegarder: tk.Button
+        + bouton_charger: tk.Button
+        + __init__(master: tk.Tk)
+    }
+
+    class LogiqueMetier {
+        - canvas: tk.Canvas
+        - noeuds: dict
+        - arcs: list
+        - debut_arc: int
+        - arc_temporaire: int
+        - mode: str
+        - nombre_colonies: str
+        + __init__(canvas: tk.Canvas)
+        + ajouter_noeud(event)
+        + dessiner_arc(event)
+        + afficher_arcs()
+        + afficher_noeuds()
+        + sauvegarder()
+        + charger_graphe()
+        + effacer_graphe()
+        + afficher_ligne_bus(graphe_ligne, couleur, offset: int)
+        + afficher_tous_bus()
+        + afficher_legende(couleurs, lignes)
+        + run_optimisation(debug: bool)
+    }
+
+    class optimizer{
+        + _instance: optimizer
+        - __new__()
+        - __init__()
+        + charger_graphe(dict)
+        + test_efficacite()
+    }
+
+    class BusGraph {
+        - noeuds: dict
+        - arcs: list
+        + __init__()
+        + add_node(node_id, x, y)
+        + add_edge(node1, node2)
+        + get_nodes() : dict
+        + get_travel_time(node1, node2) : float
+        + exists_edge(node1, node2) : bool
+        + from_dict(nodes_dict, arcs_list)
+    }
+
+    class GlobalGraph {
+        - nodes: dict
+        - arcs: list
+        - graphes: dict
+        + __init__(nodes, arcs)
+        + exists_edge(node1, node2) : bool
+        + from_dict(graph_dict)
+        + are_arcs_contingent(arc1, arc2) : bool
+        + get_contingent_nodes(noeud) : list
+    }
+
 }
 
 Application "1" -- "1" InterfaceUtilisateur : utilise
 Application "1" -- "1" LogiqueMetier : utilise
 InterfaceUtilisateur "1" -- "1" tk.Canvas : contient
 LogiqueMetier "1" -- "1" tk.Canvas : utilise
+main -> Application : main
+GlobalGraph --|> "*" BusGraph : contient (au sens mathématique)
+optimizer -up-> optimizer : instance
+IdCooker -up-> IdCooker : instance
 
 
 @enduml
