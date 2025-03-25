@@ -72,7 +72,7 @@ class Ant:
             # On choisit le prochain noeud à visiter
             # Normalement on est sûr que la fonction choix_node renverra un voisin car si on est dans un cul de sac 
             # par définition de la condition de sortie du while on n'appellera pas à nouveau la fonction choix_node
-            nouveau_noeud = self.choix_node()
+            nouveau_noeud = self.choix_noeud()
             self.tps_trajet += self.graph.exists_edge(self.noeud_actuel, nouveau_noeud)[2]
             self.noeud_actuel = nouveau_noeud
             self.a_visiter = self.voisins()
