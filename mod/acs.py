@@ -30,7 +30,6 @@ class Ant:
         self.id_fourmi = id_fourmi
         self.visites = {noeud_initial: True}
         self.a_visiter = set()
-        self.id = id_fourmi
         self.colonie = colonie
         self.tps_trajet = 0.0 # Paramètre qui permet de savoir la distance parcourue par la fourmi pour pouvoir distribuer les phéromones de manière homogène par la suite
 
