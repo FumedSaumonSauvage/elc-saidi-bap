@@ -15,6 +15,7 @@ class BusGraph:
         self.arcs = []  # (id_noeud1, id_noeud2)
         couleur = np.random.randint(0, 256, size=3) # Couleur aleatoire
         self.color = "#{:02x}{:02x}{:02x}".format(*couleur)
+        print(f"DEBUG: BusGraph {self.id} creee avec couleur {self.color}")
     
     def add_node(self, node_id, x, y):
         """

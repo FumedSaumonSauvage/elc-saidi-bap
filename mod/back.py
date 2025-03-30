@@ -155,16 +155,18 @@ class LogiqueMetier:
         pos_legende = (max([x for x, y in self.noeuds.values()]) + 50, max([y for x, y in self.noeuds.values()]) - 50)
         for i in range(len(couleurs)):
             self.canvas.create_line(pos_legende[0], pos_legende[1] + i*20, pos_legende[0] + 20, pos_legende[1] + i*20, fill=couleurs[i], width=2)
-            self.canvas.create_text(pos_legende[0] + 30, pos_legende[1] + i*20, text="Ligne " + str(lignes[i]), anchor="w")
+            self.canvas.create_text(pos_legende[0] + 30, pos_legende[1] + i*20, text="Ligne " + str(lignes[i]), anchor="w", fill="black")
 
     def verifier_graphe(self): # TODO : terminer la dfs
         # verifie si le graphe est bien connexe
         
         nodes_cp = self.noeuds.copy()
         arcs_cp = self.arcs.copy()
+
+        return True
         
 
-    def run_optimisation(self, debug = True):
+    def run_optimisation(self, debug = False):
         # Lance l'optimisation lorsqu'on appuie sur le bouton OK
         
         # On vérifie qu'on a >0 colonies, et que le graphe est bien en un seul morceau
@@ -174,8 +176,14 @@ class LogiqueMetier:
             tkm.showerror("Erreur", "Nombre de colonies invalide")
             return
         
-
-
+        if len(self.noeuds) == 0 or len(self.arcs) == 0:
+            tkm.showerror("Erreur", "Graphe vide")
+            return
+        
+        if not self.verifier_graphe():
+            tkm.showerror("Erreur", "Graphe non connexe")
+            return
+        
         if debug: # Méthode d'optimisation: le hasard. On pose 3 lignes de bus dans le pif le plus total, juste pour voir si l'IG fonctionne.
             print("DEBUG: nombre de colonies:", self.nombre_colonies.get())
             
@@ -206,9 +214,31 @@ class LogiqueMetier:
             ligne_bus_2.add_edge(noeud4, noeud5)
             
             # affichage
-            self.afficher_ligne_bus(ligne_bus, ligne_bus.color, 4)
-            self.afficher_ligne_bus(ligne_bus_2, ligne_bus_2.color, 2)
+            self.afficher_ligne_bus(ligne_bus, ligne_bus.color, 8)
+            self.afficher_ligne_bus(ligne_bus_2, ligne_bus_2.color, 4)
             self.afficher_legende([ligne_bus.color, ligne_bus_2.color], [1, 2])
 
-        pass
+            return # Si on est en debug, on SQ rien ne fonctionnera apres donc pas la peine de continuer
 
+        # Initialisation des paramètres
+        alpha = 1
+        beta = 1
+        rho = 0.5
+        q0 = 0.5
+        tau0 = 1
+        nbfourmis = 20
+        nbiter = 100
+
+        # Crétion du graphes global
+        global_graph = GlobalGraph()
+        graphe_dict = {
+            "noeuds": {id_noeud: (x, y) for id_noeud, (x, y) in self.noeuds.items()},
+            "arcs": self.arcs
+        }
+        global_graph.from_dict(graphe_dict)
+
+        opti = optimizer()
+        opti.initialiser_attributs(int(self.nombre_colonies.get()), global_graph, nbfourmis, nbiter, alpha, beta, rho, q0, tau0, conn_ig=self)
+
+        # On lance l'optimisation
+        opti.run()

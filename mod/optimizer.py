@@ -1,7 +1,7 @@
 # Classe qui gère toute l'organisation du problème d'optimisation. C'est un singleton, et regroupe les différentes classes qui composent le problème.
 import numpy as np
 from mod.graph import GlobalGraph, BusGraph
-from mod.acs import AntColonySystem
+from mod.acs import Ant_Colony, Ant
 
 class optimizer:
     _instance = None
@@ -11,38 +11,38 @@ class optimizer:
             cls._instance = super(optimizer, cls).__new__(cls, *args, **kwargs)
         return cls._instance
 
-    def __init__(self, nb_lignes_bus = None, global_graph_dict = None, nb_fourmis = 10, nb_iterations = 100, alpha=1.0, beta=2.0, rho=0.1, q0=0.9, tau0=None):
-        # TODO: voir ce qu'on fait du param nb_fourmis
+    def __init__(self):
         
         if not hasattr(self, 'initialized'):
-            self.initialized = True
+            self.initialized = False
 
-            # Initialisation des attributs
-            if nb_lignes_bus is not None:
-                self.nb_lignes_bus = nb_lignes_bus
-            else:
-                self.nb_lignes_bus = 0
-            
-            self.global_graph = GlobalGraph()
-            if global_graph_dict is not None:
-                self.global_graph.from_dict(global_graph_dict)
-
-            # Initialisation des lignes de bus:
-            self.lignes_bus = {}
-            for i in range(self.nb_lignes_bus):
-                self.lignes_bus[i] = BusGraph() # Pour le moment, les lignes de bus sont vides
-
-            # Initialisation des systèmes de colonies de fourmis
-            self.acs = {}
-            for i in range(self.nb_lignes_bus):
-                self.acs[i] = AntColonySystem(self.global_graph, i, alpha, beta, rho, q0, tau0)
-            
-
-    def add_ligne_bus(self, id, arrets):
+    def initialiser_attributs(self, nb_lignes_bus, global_graph, nb_fourmis, nb_iterations, alpha, beta, rho, q0, tau0, conn_ig):
         """
-            Ajoute une ligne de bus au problème
+            Initialise les attributs du problème d'optimisation
+            Paramètres:
+                nb_lignes_bus: le nombre de lignes de bus à créer
+                global_graph: le graphe global du problème
+                nb_fourmis: le nombre de fourmis par colonie
+                nb_iterations: le nombre d'itérations de l'algorithme
+                conn_ig: connexion à l'interface graphique par Logique_metier
         """
-        self.lignes_bus[id] = BusGraph(id, arrets)
+
+        self.nb_lignes_bus = nb_lignes_bus
+        self.global_graph = global_graph
+
+        # Initialisation des lignes de bus:
+        self.lignes_bus = {}
+        for i in range(self.nb_lignes_bus):
+            self.lignes_bus[i] = BusGraph() # Pour le moment, les lignes de bus sont vides
+
+        # Initialisation des systèmes de colonies de fourmis
+        self.acs = {}
+        for i in range(self.nb_lignes_bus):
+            self.acs[i] = Ant_Colony(self.global_graph, i, alpha, beta, rho, q0, tau0)
+
+        connexion_interface = conn_ig
+
+        self.initialized = True
 
     def get_ligne_bus(self, id):
         """
@@ -56,34 +56,30 @@ class optimizer:
         """
         return self.lignes_bus
 
-    def charger_graphe(self, graph_dict):
-        """
-            Charge le graphe global à partir d'un dictionnaire
-        """
-        self.global_graph.from_dict(graph_dict)
-
-    def calcul_matrice_distance(self, noeuds):
-        """
-            Calcule la matrice des distances entre les noeuds du graphe global
-            Structure des noeuds: {id_noeud: (x, y)}
-
-            return {id_noeud1: {id_noeud2: distance(id_noeud1, id_noeud2) for id_noeud2 in noeuds} for id_noeud1 in noeuds}
-        """
-        self.distances = {}
-        for id_noeud1, (x1, y1) in noeuds.items():
-            self.distances[id_noeud1] = {}
-            for id_noeud2, (x2, y2) in noeuds.items():
-                if id_noeud1 != id_noeud2:
-                    # On fait l'hypothèse que le temps de parcours est proportionnel à la distance euclidienne car les fourmis se déplacent à vitesse constante
-                    self.distances[id_noeud1][id_noeud2] = np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
-        return self.distances
-    
 
     # Test de l'efficacité de la solution du problème
     def test_efficacite():
         # On veut deux choses:
         # - Pour tout couple de noeuds (arrêts) du graphe global, on veut pouvoir voyager de l'un à l'autre en prenant un (ou plusieurs) bus. Si c'est impossible (graphe disjoint), ca sert à rien de continuer
         # - On veut minimiser ce temps moyen de voyage entre deux noeuds pris au hasard
+        pass
+
+    def run(self):
+        """
+            Lance l'optimisation.
+            Devrait ressembler à qqch commme:
+
+            Créer des lignes de bus au hasard (taille 1)
+
+            Pour chaque itération:
+                Pour chaque colonie:
+                    Pour chaque fourmi:
+                        fourmi.choix_noeud()
+                        fourmi.deposer_pheromones()
+                    colonie.update_pheromones()
+                    colonie.update_visites()
+                    màj_interface()
+        """
         pass
 
 
