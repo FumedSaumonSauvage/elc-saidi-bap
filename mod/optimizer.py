@@ -40,7 +40,7 @@ class optimizer:
         for i in range(self.nb_lignes_bus):
             self.acs[i] = Ant_Colony(self.global_graph, i, alpha, beta, rho, q0, tau0)
 
-        connexion_interface = conn_ig
+        self.connexion_interface = conn_ig
 
         self.initialized = True
 
@@ -127,6 +127,9 @@ class optimizer:
             self.lignes_bus[i].add_edge(point1, point2, poids)
         
         # Expansion des lignes de bus
+        while not self.test_couverture_bus():
+            for i in range(self.nb_lignes_bus):
+                self.lignes_bus[i].expansion()
         
         for iteration in range(self.nb_iterations):
             for i in range(self.nb_lignes_bus):
@@ -141,4 +144,14 @@ class optimizer:
 
     def màj_interface(self):
         # Mise à jour de l'interface: on affiche sur chaque arc quelle ligne de bus passe par là
-        pass
+
+        offset = 0
+        couleurs = []
+        id_lignes = []
+        for ligne_bus in self.lignes_bus:
+            couleurs.append(ligne_bus.couleur)
+            id_lignes.append(ligne_bus.id)
+            offset += 2
+            self.connexion_interface.afficher_ligne_bus(ligne_bus, ligne_bus.couleur, offset)
+        
+        self.connexion_interface.afficher_legende(couleurs, id_lignes)
