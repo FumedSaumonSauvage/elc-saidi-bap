@@ -103,5 +103,11 @@ class GlobalGraph:
         """
         return arc1[0] == arc2[0] or arc1[0] == arc2[1] or arc1[1] == arc2[0] or arc1[1] == arc2[1]
     
-   
+    def get_2_random_nodes_init(self):
+        """
+        Renvoie 2 noeuds au hasard, parcourus par une arête.
+        Utilisé dans la création de lignes de bus lors de l'optimisation.
+        """
+        arc = self.arcs[np.random.randint(0, len(self.arcs))]
+        return arc[0], arc[1], arc[2]
 

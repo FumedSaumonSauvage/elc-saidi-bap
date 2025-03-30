@@ -58,11 +58,51 @@ class optimizer:
 
 
     # Test de l'efficacité de la solution du problème
-    def test_efficacite():
+    def test_efficacite(self):
         # On veut deux choses:
         # - Pour tout couple de noeuds (arrêts) du graphe global, on veut pouvoir voyager de l'un à l'autre en prenant un (ou plusieurs) bus. Si c'est impossible (graphe disjoint), ca sert à rien de continuer
         # - On veut minimiser ce temps moyen de voyage entre deux noeuds pris au hasard
+        
+        if not self.test_couverture_bus():
+            return -1
+        
         pass
+
+    def test_couverture_bus(self):
+        # Vérifie si tout noeud du graphe est accessible par un voyageur prenant le bus
+        for node in self.global_graph.nodes: # Vérifie si chaque noeud est accessible par une ligne de bus
+            if not any(bus_graph.exists_edge(node, _) for _, bus_graph in self.lignes_bus.items()):
+                return False
+            
+        repertoire_noeuds_contact = {} # Noeud i , ligne_bus 1, ligne_bus 2
+            
+        for noeud in self.global_graph.nodes: # Pour chaque noeud, si plusieurs lignes passent dessus on les ajoute dans le répertoire de contact
+            lignes_contenant_noeud = [
+                ligne_id for ligne_id, bus_graph in self.lignes_bus.items()
+                if any(bus_graph.exists_edge(noeud, _) for _ in self.global_graph.nodes)
+            ]
+            if len(lignes_contenant_noeud) > 1:
+                repertoire_noeuds_contact[noeud] = lignes_contenant_noeud
+
+        lignes_contact = []
+        lignes_contact.append(self.lignes_bus[0])
+        for ligne in self.lignes_bus:
+            if ligne not in lignes_contact:
+                apparitions_repertoire = [
+                        noeud for noeud, lignes in repertoire_noeuds_contact.items()
+                        if ligne in lignes
+                    ]
+                voisins = [
+                    other_ligne for noeud in apparitions_repertoire
+                    for other_ligne in repertoire_noeuds_contact[noeud]
+                    if other_ligne != ligne and other_ligne not in voisins
+                ]
+                if any(voisin in lignes_contact for voisin in voisins):
+                    lignes_contact.append(ligne)
+
+        return len(lignes_contact) == len(self.lignes_bus)
+                
+
 
     def run(self):
         """
@@ -80,7 +120,25 @@ class optimizer:
                     colonie.update_visites()
                     màj_interface()
         """
+
+        # Attribution de 2 neods pour chaque ligne de bus
+        for i in range(self.nb_lignes_bus):
+            point1, point2, poids= self.global_graph.get_2_random_nodes_init()
+            self.lignes_bus[i].add_edge(point1, point2, poids)
+        
+        # Expansion des lignes de bus
+        
+        for iteration in range(self.nb_iterations):
+            for i in range(self.nb_lignes_bus):
+                for j in range(self.acs[i].nb_fourmis):
+                    self.acs[i].fourmis[j].choix_noeud()
+                    self.acs[i].fourmis[j].deposer_pheromones()
+                self.acs[i].update_pheromones()
+                self.acs[i].update_visites()
+                #self.màj_interface() # A coder
+
         pass
 
-
-
+    def màj_interface(self):
+        # Mise à jour de l'interface: on affiche sur chaque arc quelle ligne de bus passe par là
+        pass
