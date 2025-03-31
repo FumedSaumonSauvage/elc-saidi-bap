@@ -69,6 +69,16 @@ class BusGraph:
             "noeuds": self.noeuds,
             "arcs": self.arcs
         }
+    
+    def expansion(self, global_graph):
+        """
+            Pour chaque noeud de la ligne de bus, on étend la ligne à ses voisins en regardant le graphe global
+        """
+        for node in self.noeuds:
+            for neighbor in global_graph.nodes:
+                if global_graph.exists_edge(node, neighbor):
+                    self.add_node(neighbor, *global_graph.nodes[neighbor])
+                    self.add_edge(node, neighbor)
 
 
 class GlobalGraph:
