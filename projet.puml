@@ -57,12 +57,19 @@ package mod{
         + run_optimisation(debug: bool)
     }
 
-    class optimizer{
-        + _instance: optimizer
-        - __new__()
-        - __init__()
-        + charger_graphe(dict)
-        + test_efficacite()
+    class optimizer {
+        - _instance: static optimizer
+        + nb_lignes_bus: int
+        + global_graph: Graph
+        + lignes_bus: dict
+        + initialized: bool
+        + initialiser_attributs(...): void
+        + get_ligne_bus(id: int): BusGraph
+        + get_all_lignes_bus(): dict
+        + test_efficacite(): int
+        + test_couverture_bus(): bool
+        + run(): void
+        + màj_interface(): void
     }
 
     class BusGraph {
@@ -88,16 +95,49 @@ package mod{
         + get_contingent_nodes(noeud) : list
     }
 
+    class Ant_Colony {
+        + id_colony: int
+        + nb_fourmis: int
+        + graph: GlobalGraph
+        + fourmis: list
+        + pheromones: dict
+        + alpha: float
+        + beta: float
+        + rho: float
+        + q0: float
+        + qte_pheromones: float
+        + __init__(id_colony: int, nb_fourmis: int, graph: dict, ...)
+    }
+
+    class Ant {
+        + objectif: bool
+        + noeud_actuel: int
+        + noeud_cible: int
+        + id_fourmi: int
+        + visites: dict
+        + a_visiter: set
+        + colonie: Ant_Colony
+        + tps_trajet: float
+        + __init__(id_fourmi, noeud_initial, noeud_cible, colonie): void
+        + voisins(): list
+        + choix_noeud(): int
+        + deplacement(): void
+    }
+
 }
 
-Application "1" -- "1" InterfaceUtilisateur : utilise
-Application "1" -- "1" LogiqueMetier : utilise
-InterfaceUtilisateur "1" -- "1" tk.Canvas : contient
-LogiqueMetier "1" -- "1" tk.Canvas : utilise
-main -> Application : main
-GlobalGraph --|> "*" BusGraph : contient (au sens mathématique)
-optimizer -up-> optimizer : instance
-IdCooker -up-> IdCooker : instance
+Application "1" -- "1" InterfaceUtilisateur
+Application "1" -- "1" LogiqueMetier
+InterfaceUtilisateur -- "1" tk.Canvas
+LogiqueMetier -- "1" tk.Canvas
+main -up-> Application : main
+optimizer -up-> "1" optimizer : instance
+IdCooker -up-> "1" IdCooker : instance
+optimizer -- "1" LogiqueMetier
+optimizer -- "*" BusGraph
+optimizer -- "1" GlobalGraph
 
+Ant_Colony "1" -- "*" Ant
+Ant_Colony "1" -- "1" GlobalGraph
 
 @enduml
