@@ -36,9 +36,14 @@ class optimizer:
             self.lignes_bus[i] = BusGraph() # Pour le moment, les lignes de bus sont vides
 
         # Initialisation des systèmes de colonies de fourmis
+        noeud_depart = self.global_graph.get_random_node()
+        noeud_arrivee = self.global_graph.get_random_node()
+
+        qte_pheromones = 1 # Quantité de phéromones à déposer par les fourmis
+        
         self.acs = {}
         for i in range(self.nb_lignes_bus):
-            self.acs[i] = Ant_Colony(self.global_graph, i, alpha, beta, rho, q0, tau0)
+            self.acs[i] = Ant_Colony(i, nb_fourmis, self.global_graph, noeud_depart, noeud_arrivee, qte_pheromones, alpha, beta, rho, q0, tau0)
 
         self.connexion_interface = conn_ig
 

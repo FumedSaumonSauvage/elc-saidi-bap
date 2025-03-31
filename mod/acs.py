@@ -88,4 +88,3 @@ class Ant:
                 for n2 in self.visites.keys():
                     if n1 != n2 and self.colonie.graph.exists_edge(n1, n2):
                         self.colonie.pheromones[(n1, n2)] += ratio_pheromone * self.graph.exists_edge(n1, n2)[2]
-
