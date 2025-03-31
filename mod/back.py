@@ -157,13 +157,29 @@ class LogiqueMetier:
             self.canvas.create_line(pos_legende[0], pos_legende[1] + i*20, pos_legende[0] + 20, pos_legende[1] + i*20, fill=couleurs[i], width=2)
             self.canvas.create_text(pos_legende[0] + 30, pos_legende[1] + i*20, text="Ligne " + str(lignes[i]), anchor="w", fill="black")
 
-    def verifier_graphe(self): # TODO : terminer la dfs
-        # verifie si le graphe est bien connexe
+    def verifier_graphe(self):
+        # verifie si le graphe est bien connexe par un dfs
         
         nodes_cp = self.noeuds.copy()
         arcs_cp = self.arcs.copy()
 
-        return True
+        noeuds = list(nodes_cp.keys())
+        if not noeuds:
+            return True  # Un graphe vide est considéré comme connexe
+
+        visites = set()
+
+        def dfs(noeud):
+            visites.add(noeud)
+            for arc in arcs_cp:
+                if arc[0] == noeud and arc[1] not in visites:
+                    dfs(arc[1])
+                elif arc[1] == noeud and arc[0] not in visites:
+                    dfs(arc[0])
+
+        dfs(noeuds[0])
+        return len(visites) == len(noeuds)
+
         
 
     def run_optimisation(self, debug = False):
