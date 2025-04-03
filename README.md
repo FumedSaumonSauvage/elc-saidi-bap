@@ -38,6 +38,11 @@ Mise à jour des phéromones :
 
 ## Explication globale
 
+Schéma global de l'application, retrouvable dans [le fichier PlantuML associé](projet.puml):
+
+![projet](./out/projet/projet_bap.png)
+
+
 ### Interface
 L'interface est pilotée par interface.py, instanciée par main.py. On utilise une logique métier dans le back.py pour coordonner les actions: ce fichier gère la logique de l'interface (zone de dessin, boutons etc).
 
@@ -45,4 +50,8 @@ L'interface communique les actions au back, qui les communique à l'optimizer, q
 
 ### Optimizer
 L'optimizer est le fichier principal faisant la liaison entre le problème d'allocation des bus, la classe des graphes de bus, les colonies de fourmis (acs.py), et les tests.
+
+### Graph & BusGraph
+
+Les classes Graph et busgraph sont des classes dédiées au stockage et à la manipulation des données de graphe : la classe `GlobalGraph()` représente le graphe total (la "ville"), et les `BusGraph()` sont les graphes liés à chaque ligne de bus. Il aurait été possible de changer la structure de données pour stocker directement les graphes dans les colonies de fourmis, mais
 

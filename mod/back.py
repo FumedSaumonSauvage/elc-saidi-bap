@@ -88,9 +88,6 @@ class LogiqueMetier:
         for arc_id in self.canvas.find_withtag("arc"):  # On tag les arcs (voir juste apres) pour ne pas effacer les noeuds
             self.canvas.delete(arc_id)
 
-        print(self.noeuds)
-        print(self.arcs)
-
         for noeud1, noeud2, _ in self.arcs:
             x1, y1 = self.noeuds[noeud1]
             x2, y2 = self.noeuds[noeud2]
@@ -116,7 +113,7 @@ class LogiqueMetier:
 
     def charger_graphe(self):
         # Chargement du graphe depuis un json (comme généré pendant la sauvearde)
-        fichier = askopenfile(mode='r')
+        fichier = askopenfile(mode='r', filetypes=[("JSON", "*.json")])
         if fichier is None:
             return
         graphe = json.load(fichier)

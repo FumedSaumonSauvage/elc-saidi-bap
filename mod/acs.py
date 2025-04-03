@@ -7,8 +7,8 @@ class Ant_Colony:
     def __init__(self, id_colony, nb_fourmis, graph, noeud_depart, noeud_arrivee, qte_pheromones, alpha=1.0, beta=2.0, rho=0.1, q0=0.9, tau0=None):
         self.id_colony = id_colony
         self.nb_fourmis = nb_fourmis
-        self.graph = GlobalGraph()
-        self.graph.from_dict(graph)
+        self.graph = graph
+        #print(f"DEBUG: self.graph: {type(self.graph)}")
         self.fourmis = [Ant(i, noeud_depart, noeud_arrivee, self) for i in range(nb_fourmis)]
         self.pheromones = {}
         for i in self.graph.get_nodes().keys():

@@ -23,20 +23,21 @@ class BusGraph:
         """
         self.noeuds[node_id] = (x, y)
     
-    def add_edge(self, node1, node2):
+    def add_edge(self, node1, node2, poids):
         """
-            Ajoute une arête entre deux nœuds
+            Ajoute une arête entre deux nœuds qui existent déjà
         """
         # On vérifie qu'il existe bien les deux noeuds ainsi que l'arête qui les relie
         if not self.exists_edge(node1, node2) and node1 in self.noeuds and node2 in self.noeuds:
-            # Calcule le temps de parcours basé sur la distance euclidienne (classique)
-            x1, y1 = self.noeuds[node1]
-            x2, y2 = self.noeuds[node2]
+            self.arcs.append((node1, node2, poids))
+            self.arcs.append((node2, node1, poids)) 
+        else:
+            print(f"DEBUG: Impossible d'ajouter l'arête entre {node1} et {node2} car elle existe déjà ou les noeuds n'existent pas")
 
-            temps_parcours = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
-            self.arcs.append((node1, node2, temps_parcours))
-            self.arcs.append((node2, node1, temps_parcours))  # --> Le graphe n'est pas orienté
-    
+    def get_id(self): return self.id
+
+    def get_color(self): return self.color
+
     def get_nodes(self): return self.noeuds
 
     def get_edges(self): return self.arcs
@@ -73,6 +74,7 @@ class BusGraph:
     def expansion(self, global_graph):
         """
             Pour chaque noeud de la ligne de bus, on étend la ligne à ses voisins en regardant le graphe global
+            global_graph: GlobalGraph()
         """
         for node in self.noeuds:
             for neighbor in global_graph.nodes:
@@ -98,7 +100,7 @@ class GlobalGraph:
         """
             Vérifie si une arête existe entre deux nœuds dans le graphe global (ie : il existe au moins une ligne de bus qui relie les deux noeuds)
         """
-        return any(bus_graph.exists_edge(node1, node2) for _, bus_graph in self.graphes.items())
+        return any(arc[0] == node1 and arc[1] == node2 for arc in self.arcs) or any(arc[0] == node2 and arc[1] == node1 for arc in self.arcs)
     
     def from_dict(self, graph_dict):
         """
@@ -121,3 +123,14 @@ class GlobalGraph:
         arc = self.arcs[np.random.randint(0, len(self.arcs))]
         return arc[0], arc[1], arc[2]
 
+    def get_random_node(self):
+        """
+        Renvoie un noeud au hasard
+        """
+        return np.random.choice(list(self.nodes.keys()))
+    
+    def get_nodes(self):
+        """
+        Renvoie les noeuds du graphe
+        """
+        return self.nodes

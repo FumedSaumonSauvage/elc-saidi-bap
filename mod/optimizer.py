@@ -21,7 +21,7 @@ class optimizer:
             Initialise les attributs du problème d'optimisation
             Paramètres:
                 nb_lignes_bus: le nombre de lignes de bus à créer
-                global_graph: le graphe global du problème
+                global_graph: le graphe global du problème, classe GlobalGraph
                 nb_fourmis: le nombre de fourmis par colonie
                 nb_iterations: le nombre d'itérations de l'algorithme
                 conn_ig: connexion à l'interface graphique par Logique_metier
@@ -31,6 +31,7 @@ class optimizer:
         self.global_graph = global_graph
 
         # Initialisation des lignes de bus:
+        print(f"DEBUG: Initialisation des lignes de bus")
         self.lignes_bus = {}
         for i in range(self.nb_lignes_bus):
             self.lignes_bus[i] = BusGraph() # Pour le moment, les lignes de bus sont vides
@@ -41,6 +42,7 @@ class optimizer:
 
         qte_pheromones = 1 # Quantité de phéromones à déposer par les fourmis
         
+        print(f"DEBUG: Initialisation des colonies de fourmis")
         self.acs = {}
         for i in range(self.nb_lignes_bus):
             self.acs[i] = Ant_Colony(i, nb_fourmis, self.global_graph, noeud_depart, noeud_arrivee, qte_pheromones, alpha, beta, rho, q0, tau0)
@@ -71,7 +73,24 @@ class optimizer:
         if not self.test_couverture_bus():
             return -1
         
-        pass
+        total_time = 0
+        num_pairs = 0
+
+        for node1 in self.global_graph.nodes:
+            for node2 in self.global_graph.nodes:
+                if node1 != node2:
+                    shortest_time = float('inf')
+                    for ligne_id, bus_graph in self.lignes_bus.items():
+                        if bus_graph.exists_path(node1, node2):
+                            travel_time = bus_graph.get_path_time(node1, node2)
+                            shortest_time = min(shortest_time, travel_time)
+                    if shortest_time == float('inf'):
+                        return -1  # Impossible de voyager entre deux noeuds, en théorie on a déjà vérifié ça avant
+                    total_time += shortest_time
+                    num_pairs += 1
+
+        return total_time / num_pairs # utilisation tu temps de trajet moyen
+    
 
     def test_couverture_bus(self):
         # Vérifie si tout noeud du graphe est accessible par un voyageur prenant le bus
@@ -134,16 +153,17 @@ class optimizer:
         # Expansion des lignes de bus
         while not self.test_couverture_bus():
             for i in range(self.nb_lignes_bus):
-                self.lignes_bus[i].expansion()
+                self.lignes_bus[i].expansion(self.global_graph)
         
         for iteration in range(self.nb_iterations):
+            print(f"Iteration {iteration+1}/{self.nb_iterations}")
             for i in range(self.nb_lignes_bus):
                 for j in range(self.acs[i].nb_fourmis):
                     self.acs[i].fourmis[j].choix_noeud()
                     self.acs[i].fourmis[j].deposer_pheromones()
                 self.acs[i].update_pheromones()
                 self.acs[i].update_visites()
-                #self.màj_interface() # A coder
+                self.màj_interface() # A coder
 
         pass
 
