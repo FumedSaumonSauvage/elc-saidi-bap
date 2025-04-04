@@ -50,6 +50,7 @@ class optimizer:
         self.connexion_interface = conn_ig
 
         self.initialized = True
+        print(f"DEBUG: Initialisation de l'optimizer terminée")
 
     def get_ligne_bus(self, id):
         """
@@ -145,16 +146,23 @@ class optimizer:
                     màj_interface()
         """
 
+        print(f"DEBUG: Lancement de l'optimisation...")
+
+        print(f"DEBUG: démarrage des lignes de bus")
         # Attribution de 2 neods pour chaque ligne de bus
         for i in range(self.nb_lignes_bus):
             point1, point2, poids= self.global_graph.get_2_random_nodes_init()
+            self.lignes_bus[i].add_node(point1, *self.global_graph.nodes[point1])
+            self.lignes_bus[i].add_node(point2, *self.global_graph.nodes[point2])
             self.lignes_bus[i].add_edge(point1, point2, poids)
         
+        print(f"DEBUG: expansion des lignes de bus...")
         # Expansion des lignes de bus
         while not self.test_couverture_bus():
             for i in range(self.nb_lignes_bus):
                 self.lignes_bus[i].expansion(self.global_graph)
         
+        print(f"DEBUG: Lancmeent itération")
         for iteration in range(self.nb_iterations):
             print(f"Iteration {iteration+1}/{self.nb_iterations}")
             for i in range(self.nb_lignes_bus):

@@ -8,7 +8,6 @@ class Ant_Colony:
         self.id_colony = id_colony
         self.nb_fourmis = nb_fourmis
         self.graph = graph
-        #print(f"DEBUG: self.graph: {type(self.graph)}")
         self.fourmis = [Ant(i, noeud_depart, noeud_arrivee, self) for i in range(nb_fourmis)]
         self.pheromones = {}
         for i in self.graph.get_nodes().keys():

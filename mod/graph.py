@@ -32,7 +32,13 @@ class BusGraph:
             self.arcs.append((node1, node2, poids))
             self.arcs.append((node2, node1, poids)) 
         else:
-            print(f"DEBUG: Impossible d'ajouter l'arête entre {node1} et {node2} car elle existe déjà ou les noeuds n'existent pas")
+            if node1 in self.noeuds and node2 in self.noeuds:
+                print(f"DEBUG: Impossible d'ajouter l'arête entre {node1} et {node2} car elle existe déjà")
+            else:
+                if node1 not in self.noeuds:
+                    print(f"DEBUG: Impossible d'ajouter l'arête entre {node1} et {node2} car le noeud {node1} n'existe pas")
+                if node2 not in self.noeuds:
+                    print(f"DEBUG: Impossible d'ajouter l'arête entre {node1} et {node2} car le noeud {node2} n'existe pas")
 
     def get_id(self): return self.id
 
@@ -80,7 +86,7 @@ class BusGraph:
             for neighbor in global_graph.nodes:
                 if global_graph.exists_edge(node, neighbor):
                     self.add_node(neighbor, *global_graph.nodes[neighbor])
-                    self.add_edge(node, neighbor)
+                    self.add_edge(node, neighbor, global_graph.get_edge_weight(node, neighbor))
 
 
 class GlobalGraph:
@@ -134,3 +140,13 @@ class GlobalGraph:
         Renvoie les noeuds du graphe
         """
         return self.nodes
+    
+    def get_edge_weight(self, node1, node2):
+        """
+        Renvoie le poids d'un arc entre 2 noeuds
+        """
+        if not self.exists_edge(node1, node2):
+            return None
+        for arc in self.arcs:
+            if (arc[0] == node1 and arc[1] == node2) or (arc[0] == node2 and arc[1] == node1):
+                return arc[2]
