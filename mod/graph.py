@@ -77,16 +77,22 @@ class BusGraph:
             "arcs": self.arcs
         }
     
-    def expansion(self, global_graph):
+    def expansion(self, global_graph): # TODO : corriger l'expansion, pour l'instant ça loop mais sans rien faire. On pourrait faire commencer les bus en tant que graphes maximaux et pénaliser sur la longueur d'une ligne.
         """
-            Pour chaque noeud de la ligne de bus, on étend la ligne à ses voisins en regardant le graphe global
+            Étend la ligne de bus à partir de ses nœuds initiaux jusqu'à ce que tout le graphe global soit exploré.
             global_graph: GlobalGraph()
         """
-        for node in self.noeuds:
+        visited_nodes = set(self.noeuds.keys())  # Ensemble des nœuds déjà visités
+        queue = list(self.noeuds.keys())  # File d'attente pour les noeuds à explorer
+
+        while queue:
+            current_node = queue.pop(0)  # Récupère le premier nœud de la file
             for neighbor in global_graph.nodes:
-                if global_graph.exists_edge(node, neighbor):
+                if neighbor not in visited_nodes and global_graph.exists_edge(current_node, neighbor):
                     self.add_node(neighbor, *global_graph.nodes[neighbor])
-                    self.add_edge(node, neighbor, global_graph.get_edge_weight(node, neighbor))
+                    self.add_edge(current_node, neighbor, global_graph.get_edge_weight(current_node, neighbor))
+                    visited_nodes.add(neighbor)  # Marque le nœud comme visité
+                    queue.append(neighbor)  # Ajoute le voisin à la file d'attente
 
 
 class GlobalGraph:

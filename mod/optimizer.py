@@ -148,7 +148,7 @@ class optimizer:
 
         print(f"DEBUG: Lancement de l'optimisation...")
 
-        print(f"DEBUG: démarrage des lignes de bus")
+        print(f"DEBUG: Démarrage des lignes de bus")
         # Attribution de 2 neods pour chaque ligne de bus
         for i in range(self.nb_lignes_bus):
             point1, point2, poids= self.global_graph.get_2_random_nodes_init()
@@ -156,7 +156,7 @@ class optimizer:
             self.lignes_bus[i].add_node(point2, *self.global_graph.nodes[point2])
             self.lignes_bus[i].add_edge(point1, point2, poids)
         
-        print(f"DEBUG: expansion des lignes de bus...")
+        print(f"DEBUG: Expansion des lignes de bus...")
         # Expansion des lignes de bus
         while not self.test_couverture_bus():
             for i in range(self.nb_lignes_bus):

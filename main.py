@@ -1,6 +1,7 @@
 import tkinter as tk
 from mod.interface import InterfaceUtilisateur
 from mod.back import LogiqueMetier
+from PIL import Image, ImageTk
 
 class Application:
     def __init__(self):
@@ -8,7 +9,11 @@ class Application:
         self.root.title("Projet BAP")
 
         try:
-            self.root.iconbitmap("assets/bus.ico")
+
+            icone = Image.open("assets/bus.ico")
+            iconeTK = ImageTk.PhotoImage(icone)
+    
+            self.root.iconphoto(True, iconeTK)
         except:
             print("Impossible de charger l'icone")
 

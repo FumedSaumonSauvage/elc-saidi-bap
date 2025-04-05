@@ -198,7 +198,7 @@ class LogiqueMetier:
             return
         
         if debug: # Méthode d'optimisation: le hasard. On pose 3 lignes de bus dans le pif le plus total, juste pour voir si l'IG fonctionne.
-            print("DEBUG: nombre de colonies:", self.nombre_colonies.get())
+            print("DEBUG: Nombre de colonies:", self.nombre_colonies.get())
             
             # Creation du graphe global
             global_graph = GlobalGraph()
