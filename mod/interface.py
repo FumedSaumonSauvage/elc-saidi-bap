@@ -4,6 +4,35 @@ import matplotlib.pyplot as plt
 import tkinter as tk
 import numpy as np
 
+class Tooltip:
+    """Classe pour gérer les tooltips, tkinter est tellement nul que c'est pas prévu par défaut. Quasi entièrement généré par gemini."""
+    def __init__(self, widget, text):
+        self.widget = widget
+        self.text = text
+        self.tooltip_window = None
+        self.widget.bind("<Enter>", self.show_tooltip)
+        self.widget.bind("<Leave>", self.hide_tooltip)
+
+    def show_tooltip(self, event=None):
+        if self.tooltip_window:
+            return
+        x, y, _, _ = self.widget.bbox("insert")
+        x += self.widget.winfo_rootx() + 25
+        y += self.widget.winfo_rooty() + 25
+        self.tooltip_window = tw = tk.Toplevel(self.widget)
+        tw.wm_overrideredirect(True)
+        tw.wm_geometry(f"+{x}+{y}")
+        label = tk.Label(tw, text=self.text, justify="left",
+                         background="#ffffe0", relief="solid", borderwidth=1,
+                         font=("tahoma", "8", "normal"))
+        label.pack(ipadx=1)
+
+    def hide_tooltip(self, event=None):
+        if self.tooltip_window:
+            self.tooltip_window.destroy()
+            self.tooltip_window = None
+
+
 class InterfaceUtilisateur:
     def __init__(self, app):
         master = app.root
@@ -57,29 +86,49 @@ class InterfaceUtilisateur:
 
         # Contenu de la zone de paramètres
         params = {
-            "alpha": (0.1, 5.0, 0.1),
-            "beta": (0.1, 5.0, 0.1),
-            "tau": (0.1, 10.0, 0.1),
-            "rho": (0.01, 1.0, 0.01),
-            "q0": (0.0, 1.0, 0.01),
-            "nb_fourmis": (1, 100, 1),
-            "nb_iterations": (1, 1000, 1)
+            "alpha": (0.1, 5.0, 0.1, "Importance des phéromones dans le choix des chemins"),
+            "beta": (0.1, 5.0, 0.1, "Importance de la visibilité (1/distance)"),
+            "gamma": (0.1, 5.0, 0.1, "Pénalité pour les arcs partagés entre colonies"),
+            "tau": (0.1, 10.0, 0.1, "Niveau initial de phéromones sur les arcs"),
+            "rho": (0.01, 1.0, 0.01, "Taux d'évaporation des phéromones"),
+            "q0": (0.0, 1.0, 0.01, "Probabilité d'exploitation (vs exploration)"),
+            "nb_fourmis": (1, 100, 1, "Nombre de fourmis par colonie"),
+            "nb_iterations": (1, 1000, 1, "Nombre d'itérations de l'algorithme")
         }
 
         self.sliders = {}
-        for param, (min_val, max_val, step) in params.items():
-            frame = tk.Frame(self.param_frame)
-            frame.pack(fill=tk.X, pady=5)
+        for param, (min_val, max_val, step, description) in params.items():
+            frame = tk.Frame(self.param_frame, pady=5)
+            frame.pack(fill=tk.X, padx=10)
 
-            label = tk.Label(frame, text=param, width=12, anchor="w")
-            label.pack(side=tk.LEFT)
+            label = tk.Label(frame, text=param, width=15, anchor="w")
+            label.pack(side=tk.LEFT, padx=5)
 
             slider = tk.Scale(
-            frame, from_=min_val, to=max_val, resolution=step,
-            orient=tk.HORIZONTAL, length=200
+                frame, from_=min_val, to=max_val, resolution=step,
+                orient=tk.HORIZONTAL, length=200
             )
-            slider.pack(side=tk.RIGHT, fill=tk.X, expand=1)
+            slider.pack(side=tk.LEFT, padx=5, fill=tk.X, expand=1)
             self.sliders[param] = slider
+
+            tooltip_icon = tk.Label(frame, text="❓", fg="blue", cursor="hand2")
+            tooltip_icon.pack(side=tk.LEFT, padx=5)
+            Tooltip(tooltip_icon, description)
+
+        # Définition des valeurs par défaut
+        default_values = {
+            "alpha": 1.0,         # Importance modérée des phéromones
+            "beta": 2.0,          # Importance élevée de la visibilité
+            "gamma": 1.0,         # Pénalité modérée pour les arcs partagés
+            "tau": 0.1,           # Niveau initial faible de phéromones
+            "rho": 0.5,           # Taux d'évaporation modéré
+            "q0": 0.9,            # Forte probabilité d'exploitation
+            "nb_fourmis": 20,     # Nombre raisonnable de fourmis
+            "nb_iterations": 100  # Nombre d'itérations standard
+        }
+
+        for param, value in default_values.items():
+            self.sliders[param].set(value)
 
         # Liaison du clic du canvas à la logique métier
         self.canvas.bind("<Button-1>", self.clic_canvas)
@@ -129,6 +178,7 @@ class InterfaceUtilisateur:
             self.app.logique.run_optimisation(
                 nb_colonies=nb_colonies,
                 alpha=params.get("alpha"),
+                gamma=params.get("gamma"),
                 beta=params.get("beta"),
                 tau=params.get("tau"),
                 rho=params.get("rho"),

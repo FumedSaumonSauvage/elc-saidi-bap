@@ -84,23 +84,21 @@ class BusGraph:
 
     def expansion(self, global_graph):
         """
-            Étend la ligne de bus à partir de ses nœuds initiaux jusqu'à ce que tout le graphe global soit exploré.
+            Étend la ligne de bus en ajoutant un seul arc par appel.
             global_graph: GlobalGraph()
         """
-        visited_nodes = set(self.noeuds.keys())  # Ensemble des nœuds déjà visités
-        queue = list(self.noeuds.keys())  # File d'attente pour les noeuds à explorer
+        visited_nodes = set(self.noeuds.keys())  # Ensemble des noeuds déjà visités
 
-        while queue:
-            current_node = queue.pop(0)  # Récupère le premier nœud de la file
-            neighbors = global_graph.get_neighbors(current_node)  # Récupère les voisins du nœud actuel dans le graphe global
+        # Parcourt les noeuds déjà visités pour trouver un voisin non visité
+        for current_node in self.noeuds.keys():
+            neighbors = global_graph.get_neighbors(current_node)  # Récupère les voisins du noeuds actuel dans le graphe global
             
             for neighbor in neighbors:
-                # Vérifie que le voisin n'a pas été visité et qu'il existe un arc entre les deux nœuds
+                # Vérifie que le voisin n'a pas été visité et qu'il existe un arc entre les deux noeuds
                 if neighbor not in visited_nodes and global_graph.exists_arc(current_node, neighbor):
                     self.add_node(neighbor, *global_graph.nodes[neighbor])  # Ajoute le voisin au graphe du bus
                     self.add_arc(current_node, neighbor, global_graph.get_arc(current_node, neighbor)[2])  # Ajoute l'arc
-                    visited_nodes.add(neighbor)  # Marque le nœud comme visité
-                    queue.append(neighbor)  # Ajoute le voisin à la file d'attente
+                    return  # Arrête l'expansion après avoir ajouté un seul arc
 
 
 class GlobalGraph:

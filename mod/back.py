@@ -183,7 +183,7 @@ class LogiqueMetier:
         return len(visites) == len(noeuds)
 
 
-    def run_optimisation(self, nb_colonies = 10, alpha = 1.0, beta= 2.0, tau=0.1, rho = 0.5, q0 = 0.9, nb_fourmis = 20, nb_iterations = 100):
+    def run_optimisation(self, nb_colonies = 10, alpha = 1.0, beta= 2.0, gamma = 1.0, tau=0.1, rho = 0.5, q0 = 0.9, nb_fourmis = 20, nb_iterations = 100):
         # Lance l'optimisation lorsqu'on appuie sur le bouton OK
 
         # On vérifie qu'on a >0 colonies, et que le graphe est bien en un seul morceau
@@ -223,7 +223,7 @@ class LogiqueMetier:
         global_graph.from_dict(graphe_dict)
 
         opti = optimizer()
-        opti.initialiser_attributs(nb_colonies, global_graph, nb_fourmis, nb_iterations, alpha, beta, rho, q0, tau0, conn_ig=self)
+        opti.initialiser_attributs(nb_colonies, global_graph, nb_fourmis, nb_iterations, alpha, beta, gamma, rho, q0, tau0, conn_ig=self)
 
         # On lance l'optimisation
         opti.run()

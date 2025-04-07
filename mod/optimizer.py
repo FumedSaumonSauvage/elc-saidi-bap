@@ -15,7 +15,7 @@ class optimizer:
         if not hasattr(self, 'initialized'):
             self.initialized = False
 
-    def initialiser_attributs(self, nb_lignes_bus, global_graph, nb_fourmis, nb_iterations, alpha, beta, rho, q0, tau0, conn_ig):
+    def initialiser_attributs(self, nb_lignes_bus, global_graph, nb_fourmis, nb_iterations, alpha, beta, gamma, rho, q0, tau0, conn_ig):
         """
             Initialise les attributs du problème d'optimisation
             Paramètres:
@@ -44,7 +44,10 @@ class optimizer:
         print(f"DEBUG: Initialisation des colonies de fourmis")
         self.acs = {}
         for i in range(self.nb_lignes_bus):
-            self.acs[i] = Ant_Colony(i, nb_fourmis, self.global_graph, noeud_depart, noeud_arrivee, qte_pheromones, alpha, beta, rho, q0, tau0)
+            self.acs[i] = Ant_Colony(
+                i, nb_fourmis, self.global_graph, noeud_depart, noeud_arrivee,
+                qte_pheromones, alpha, beta, gamma, rho, q0, tau0, lignes_bus=self.lignes_bus
+            )
 
         self.connexion_interface = conn_ig
 

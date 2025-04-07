@@ -5,18 +5,19 @@ from mod.graph import GlobalGraph, BusGraph
         
 class Ant_Colony:
     def __init__(self, id_colony, nb_fourmis, graph, noeud_depart, noeud_arrivee,
-                 qte_pheromones, alpha=1.0, beta=2.0, rho=0.1, q0=0.9, tau0=0.1):
+                 qte_pheromones, alpha=1.0, beta=2.0, gamma=1.0, rho=0.1, q0=0.9, tau0=0.1, lignes_bus=None):
         self.id_colony = id_colony
         self.nb_fourmis = nb_fourmis
-        self.graph = graph
+        self.graph = graph  # Type: GlobalGraph
         self.noeud_depart = noeud_depart
         self.noeud_arrivee = noeud_arrivee
         self.qte_pheromones = qte_pheromones
-
         self.alpha = alpha
         self.beta = beta
         self.rho = rho
         self.q0 = q0
+        self.gamma = gamma  # Coefficient pour pénaliser les arcs partagés
+        self.lignes_bus = lignes_bus  # Ajout des lignes de bus
 
         # Création des fourmis
         self.fourmis = [Ant(i, noeud_depart, noeud_arrivee, self) for i in range(nb_fourmis)]
@@ -66,9 +67,18 @@ class Ant:
             max_val = -float('inf')
             next_node = None
             for node in voisins:
-                visibility = 1.0 / self.colonie.graph.get_arc(self.noeud_actuel, node)[2] # Le poids représente le temps de trajet entre 2 noeuds, ce qui est égal à sa distance
-                pheromone = self.colonie.pheromones.get((self.noeud_actuel, node), 0.1)
-                val = pheromone ** self.colonie.alpha * visibility ** self.colonie.beta
+                visibility = 1.0 / self.colonie.graph.get_arc(self.noeud_actuel, node)[2]  # Le poids représente le temps de trajet entre 2 noeuds
+                pheromone = self.colonie.pheromones.get((min(self.noeud_actuel, node), max(self.noeud_actuel, node)), 0.1)
+                
+                # Ajout du facteur gamma pour pénaliser les arcs déjà utilisés par d'autres colonies
+                gamma_penalty = 1.0
+                for ligne_id, ligne_bus in self.colonie.lignes_bus.items():
+                    if ligne_id != self.colonie.id_colony:  # Vérifie si la ligne appartient à une autre colonie
+                        if ligne_bus.exists_arc(self.noeud_actuel, node):
+                            gamma_penalty += self.colonie.gamma  # Augmente la pénalité pour chaque colonie étrangère utilisant cet arc
+                
+                # Calcul de la valeur d'attractivité avec pénalité gamma
+                val = (pheromone ** self.colonie.alpha * visibility ** self.colonie.beta) / gamma_penalty
                 if val > max_val:
                     max_val = val
                     next_node = node
@@ -105,4 +115,3 @@ class Ant:
                 key = (min(n1, n2), max(n1, n2))
                 qte = self.colonie.pheromones.get(key, 0.1) + ratio_pheromone * self.colonie.graph.get_arc(n1, n2)[2]
                 self.colonie.pheromones[key] = qte
-
