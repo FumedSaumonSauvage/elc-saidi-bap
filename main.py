@@ -26,8 +26,7 @@ class Application:
         self.interface.bouton_arc.config(command=self.logique.set_mode_arc)
         self.interface.bouton_effacer.config(command=self.logique.effacer_graphe)
         self.interface.bouton_charger.config(command=self.logique.charger_graphe)
-        self.interface.bouton_ajouter_colonies.config(command=self.logique.run_optimisation)
-
+        self.interface.bouton_ajouter_colonies.config(command=self.interface.start_optimisation)
         self.interface.canvas.bind("<Button-1>", self.logique.clic_canvas)
         
 

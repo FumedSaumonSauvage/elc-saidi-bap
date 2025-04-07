@@ -66,7 +66,7 @@ class Ant:
             max_val = -float('inf')
             next_node = None
             for node in voisins:
-                visibility = 1.0 / self.colonie.graph.get_travel_time(self.noeud_actuel, node)
+                visibility = 1.0 / self.colonie.graph.get_arc(self.noeud_actuel, node)[2] # Le poids représente le temps de trajet entre 2 noeuds, ce qui est égal à sa distance
                 pheromone = self.colonie.pheromones.get((self.noeud_actuel, node), 0.1)
                 val = pheromone ** self.colonie.alpha * visibility ** self.colonie.beta
                 if val > max_val:
@@ -82,7 +82,7 @@ class Ant:
             if next_node is None:
                 break
 
-            temps_arc = self.colonie.graph.get_travel_time(self.noeud_actuel, next_node)
+            temps_arc = self.colonie.graph.get_arc(self.noeud_actuel, next_node)[2] # temps == poids
             self.tps_trajet += temps_arc
             self.noeud_actuel = next_node
             self.visited.add(next_node)
@@ -103,6 +103,6 @@ class Ant:
                 n2 = self.path[i + 1]
                 
                 key = (min(n1, n2), max(n1, n2))
-                qte = self.colonie.pheromones.get(key, 0.1) + ratio_pheromone * self.colonie.graph.get_travel_time(n1, n2)
+                qte = self.colonie.pheromones.get(key, 0.1) + ratio_pheromone * self.colonie.graph.get_arc(n1, n2)[2]
                 self.colonie.pheromones[key] = qte
 

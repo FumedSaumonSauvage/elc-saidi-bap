@@ -31,7 +31,7 @@ class LogiqueMetier:
 
     def is_mode_arc(self):
         return self.mode == "arc"
-    
+
     def is_mode_noeud(self):
         return self.mode == "noeud"
 
@@ -51,7 +51,7 @@ class LogiqueMetier:
             self.noeuds[id_noeud] = (x, y)
         else:
             print("UB ajout noeud")
-    
+
     def dessiner_arc(self, event):
         if self.mode == "arc":
             if self.debut_arc is None:
@@ -81,7 +81,7 @@ class LogiqueMetier:
                 distance_min = distance
                 noeud_plus_proche = id_noeud
         return noeud_plus_proche
-    
+
 
     def afficher_arcs(self):
         # On vire les arcs d'avant au cas ou
@@ -133,11 +133,16 @@ class LogiqueMetier:
         # Affiche une ligne de bus sur le canvas
         # Si la ligne de bus est seule sur le canvas, on remplace l'arête par une arête de couleur
         # Sinon, on ajoute une arête de couleur, parallèle aux autres (si plusieurs lignes passent sur une même arête, on aimerait les distinguer)
-        
+
         for noeud1, noeud2, _ in graphe_ligne.arcs:
             x1, y1 = self.noeuds[noeud1]
             x2, y2 = self.noeuds[noeud2]
-            self.canvas.create_line(x1, y1+offset, x2, y2+offset, fill=couleur, width=2)
+            self.canvas.create_line(x1, y1+offset, x2, y2+offset, fill=couleur, width=2, tags="ligne_bus")
+
+    def effacer_lignes_bus(self):
+        # Efface les lignes de bus sur le canvas
+        for ligne in self.canvas.find_withtag("ligne_bus"):
+            self.canvas.delete(ligne)
 
     def afficher_tous_bus(self):
         # Affiche toutes les lignes de bus sur le canvas, pour chaque ligne de bus une couleur différente
@@ -156,7 +161,7 @@ class LogiqueMetier:
 
     def verifier_graphe(self):
         # verifie si le graphe est bien connexe par un dfs
-        
+
         nodes_cp = self.noeuds.copy()
         arcs_cp = self.arcs.copy()
 
@@ -177,70 +182,37 @@ class LogiqueMetier:
         dfs(noeuds[0])
         return len(visites) == len(noeuds)
 
-        
 
-    def run_optimisation(self, debug = False):
+    def run_optimisation(self, nb_colonies = 10, alpha = 1.0, beta= 2.0, tau=0.1, rho = 0.5, q0 = 0.9, nb_fourmis = 20, nb_iterations = 100):
         # Lance l'optimisation lorsqu'on appuie sur le bouton OK
-        
+
         # On vérifie qu'on a >0 colonies, et que le graphe est bien en un seul morceau
         # attention, nombre_colonies est un stringvar!
 
-        if int(self.nombre_colonies.get()) <= 0:
+        if nb_colonies <= 0:
             tkm.showerror("Erreur", "Nombre de colonies invalide")
             return
-        
+
         if len(self.noeuds) == 0 or len(self.arcs) == 0:
             tkm.showerror("Erreur", "Graphe vide")
             return
-        
+
         if not self.verifier_graphe():
             tkm.showerror("Erreur", "Graphe non connexe")
             return
-        
-        if debug: # Méthode d'optimisation: le hasard. On pose 3 lignes de bus dans le pif le plus total, juste pour voir si l'IG fonctionne.
-            print("DEBUG: Nombre de colonies:", self.nombre_colonies.get())
-            
-            # Creation du graphe global
-            global_graph = GlobalGraph()
-            graphe_dict = {
-                "noeuds": {id_noeud: (x, y) for id_noeud, (x, y) in self.noeuds.items()},
-                "arcs": self.arcs
-            }
-            global_graph.from_dict(graphe_dict)
 
-            # Creation d'une ligne de bus juste pour tester
-            ligne_bus = BusGraph()
-            noeud1 = list(self.noeuds.keys())[0]
-            noeud2 = list(self.noeuds.keys())[1]
-            ligne_bus.add_node(noeud1, self.noeuds[noeud1][0], self.noeuds[noeud1][1])
-            ligne_bus.add_node(noeud2, self.noeuds[noeud2][0], self.noeuds[noeud2][1])
-            ligne_bus.add_edge(noeud1, noeud2)
+        print("Lancement de l'optimisation...")
+        print(f"Nombre de colonies: {nb_colonies}")
+        print(f"Alpha: {alpha}")
+        print(f"Beta: {beta}")
+        print(f"Tau: {tau}")
+        print(f"Rho: {rho}")
+        print(f"Q0: {q0}")
+        print(f"Nombre de fourmis: {nb_fourmis}")
+        print(f"Nombre d'itérations: {nb_iterations}")
 
-            ligne_bus_2 = BusGraph()
-            noeud3 = list(self.noeuds.keys())[0]
-            noeud4 = list(self.noeuds.keys())[1]
-            noeud5 = list(self.noeuds.keys())[2]
-            ligne_bus_2.add_node(noeud3, self.noeuds[noeud3][0], self.noeuds[noeud3][1])
-            ligne_bus_2.add_node(noeud4, self.noeuds[noeud4][0], self.noeuds[noeud4][1])
-            ligne_bus_2.add_node(noeud5, self.noeuds[noeud5][0], self.noeuds[noeud5][1])
-            ligne_bus_2.add_edge(noeud3, noeud4)
-            ligne_bus_2.add_edge(noeud4, noeud5)
-            
-            # affichage
-            self.afficher_ligne_bus(ligne_bus, ligne_bus.color, 8)
-            self.afficher_ligne_bus(ligne_bus_2, ligne_bus_2.color, 4)
-            self.afficher_legende([ligne_bus.color, ligne_bus_2.color], [1, 2])
-
-            return # Si on est en debug, on SQ rien ne fonctionnera apres donc pas la peine de continuer
-
-        # Initialisation des paramètres
-        alpha = 1
-        beta = 1
-        rho = 0.5
-        q0 = 0.5
-        tau0 = 1
-        nbfourmis = 20
-        nbiter = 100
+        # Initialisation des paramètres (utilisation des arguments maintenant)
+        tau0 = 1 # Valeur par défaut pour tau0
 
         # Crétion du graphes global
         global_graph = GlobalGraph()
@@ -251,7 +223,7 @@ class LogiqueMetier:
         global_graph.from_dict(graphe_dict)
 
         opti = optimizer()
-        opti.initialiser_attributs(int(self.nombre_colonies.get()), global_graph, nbfourmis, nbiter, alpha, beta, rho, q0, tau0, conn_ig=self)
+        opti.initialiser_attributs(nb_colonies, global_graph, nb_fourmis, nb_iterations, alpha, beta, rho, q0, tau0, conn_ig=self)
 
         # On lance l'optimisation
         opti.run()

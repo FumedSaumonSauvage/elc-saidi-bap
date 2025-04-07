@@ -12,7 +12,6 @@ class optimizer:
         return cls._instance
 
     def __init__(self):
-        self.nb_iterations = 10
         if not hasattr(self, 'initialized'):
             self.initialized = False
 
@@ -29,6 +28,7 @@ class optimizer:
 
         self.nb_lignes_bus = nb_lignes_bus
         self.global_graph = global_graph
+        self.nb_iterations = nb_iterations
 
         # Initialisation des lignes de bus:
         print(f"DEBUG: Initialisation des lignes de bus")
@@ -176,10 +176,10 @@ class optimizer:
         print(f"DEBUG: Expansion des lignes de bus...")
         # Expansion des lignes de bus
         while not self.test_couverture_bus_2():
-            print("dbg: Expansion des lignes de bus...")
             for i in range(self.nb_lignes_bus):
                 self.lignes_bus[i].expansion(self.global_graph)
         self.maj_interface()
+        self.initialiser_interface()
 
         print(f"DEBUG: Lancement itération")
         for iteration in range(self.nb_iterations):
@@ -194,7 +194,10 @@ class optimizer:
 
     def maj_interface(self):
         # Mise à jour de l'interface: on affiche sur chaque arc quelle ligne de bus passe par là
+        # On efface les anciennes lignes de bus
+        self.connexion_interface.effacer_lignes_bus()
 
+        # On affiche les nouvelles lignes de bus
         offset = 0
         couleurs = []
         id_lignes = []
@@ -203,5 +206,13 @@ class optimizer:
             id_lignes.append(ligne_bus.id)
             offset += 2
             self.connexion_interface.afficher_ligne_bus(ligne_bus, ligne_bus.couleur, offset)
-        
+    
+    def initialiser_interface(self):
+        # Sert juste à n'afficher la légende qu'une fois
+        couleurs = []
+        id_lignes = []
+        for id, ligne_bus in self.lignes_bus.items():
+            couleurs.append(ligne_bus.couleur)
+            id_lignes.append(ligne_bus.id)
+
         self.connexion_interface.afficher_legende(couleurs, id_lignes)
