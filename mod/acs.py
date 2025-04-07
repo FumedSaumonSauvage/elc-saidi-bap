@@ -32,6 +32,10 @@ class Ant_Colony:
         for fourmi in self.fourmis:
             fourmi.reset()
 
+    def update_pheromones(self):
+        # Mise à jour des phéromones sur les arcs
+        for key in self.pheromones.keys():
+            self.pheromones[key] *= (1 - self.rho) if self.rho < 1 else 0.0  # Évaporation des phéromones
 
 class Ant:
     def __init__(self, id_fourmi, noeud_initial, noeud_cible, colonie):
