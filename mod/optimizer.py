@@ -84,10 +84,9 @@ class optimizer:
             for node2 in self.global_graph.nodes:
                 if node1 != node2:
                     shortest_time = float('inf')
-                    for ligne_id, bus_graph in self.lignes_bus.items():
-                        travel_time = bus_graph.exists_path(node1, node2)
-                        if travel_time != -1: # exists_path renvoie -1 si le chemin n'existe pas
-                            shortest_time = min(shortest_time, travel_time) 
+                    travel_time = self.global_graph.exists_path(node1, node2, self.lignes_bus)
+                    if travel_time != -1: # exists_path renvoie -1 si le chemin n'existe pas
+                        shortest_time = min(shortest_time, travel_time) 
                     if shortest_time == float('inf'):
                         return -1  # Impossible de voyager entre deux noeuds, en théorie on a déjà vérifié ça avant
                     total_time += shortest_time

@@ -100,7 +100,6 @@ class BusGraph:
                     self.add_arc(current_node, neighbor, global_graph.get_arc(current_node, neighbor)[2])  # Ajoute l'arc
                     return  # Arrête l'expansion après avoir ajouté un seul arc
 
-
 class GlobalGraph:
     # Classe qui décrit le graphe global "vierge" (sans les lignes de bus)
 
@@ -120,7 +119,7 @@ class GlobalGraph:
         self.nodes = graph_dict["noeuds"]
         self.arcs = graph_dict["arcs"]
 
-    def exists_path(self, node1, node2):
+    def exists_path(self, node1, node2, lignes_bus):
         # implémentataion d'un DFS pour vérifier si un chemin existe entre deux noeuds
         visited = set()
         stack = [node1]
@@ -132,8 +131,17 @@ class GlobalGraph:
                 return path_time
             if current_node not in visited:
                 visited.add(current_node)
-                path_time += self.get_travel_time(current_node, last_known_node)  # Ajoute le temps de trajet entre les deux noeuds
-                neighbors = self.get_neighbors(current_node)
+                # Ajout des voisins du current_node dans la pile en vérifiant qu'ils sont accessibles par une ligne de bus
+                # On ne peut pas utiliser self.get_neighbors(current_node) car on ne ferait pas la distinction entre les arêtes globales du graphe et celles couvertes par les lignes de bus
+                neighbors = []
+                for ligne_id, ligne_bus in lignes_bus.items():
+                    if current_node in ligne_bus.get_nodes():
+                        # On ajoute les voisins du noeud actuel dans la liste des voisins
+                        for other_node in ligne_bus.get_nodes():
+                            if other_node != current_node and other_node not in visited and other_node not in neighbors and ligne_bus.exists_arc(current_node, other_node):
+                                neighbors.append(other_node)
+                
+                path_time += self.get_arc(current_node, last_known_node)[2]  # Ajoute le temps de trajet entre les deux noeuds
                 last_known_node = current_node  # Met à jour le dernier noeud connu
                 stack.extend(neighbors)
         return -1 # Retourne -1 si aucun chemin n'existe entre les deux noeuds (convention)
