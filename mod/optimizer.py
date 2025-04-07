@@ -12,7 +12,7 @@ class optimizer:
         return cls._instance
 
     def __init__(self):
-        
+        self.nb_iterations = 10
         if not hasattr(self, 'initialized'):
             self.initialized = False
 
@@ -35,7 +35,6 @@ class optimizer:
         self.lignes_bus = {}
         for i in range(self.nb_lignes_bus):
             self.lignes_bus[i] = BusGraph() # Pour le moment, les lignes de bus sont vides
-
         # Initialisation des systèmes de colonies de fourmis
         noeud_depart = self.global_graph.get_random_node()
         noeud_arrivee = self.global_graph.get_random_node()
@@ -96,7 +95,7 @@ class optimizer:
     def test_couverture_bus(self):
         # Vérifie si tout noeud du graphe est accessible par un voyageur prenant le bus
         for node in self.global_graph.nodes: # Vérifie si chaque noeud est accessible par une ligne de bus
-            if not any(bus_graph.exists_edge(node, _) for _, bus_graph in self.lignes_bus.items()):
+            if not any(bus_graph.exists_arc(node, _) for _, bus_graph in self.lignes_bus.items()):
                 return False
             
         repertoire_noeuds_contact = {} # Noeud i , ligne_bus 1, ligne_bus 2
@@ -104,7 +103,7 @@ class optimizer:
         for noeud in self.global_graph.nodes: # Pour chaque noeud, si plusieurs lignes passent dessus on les ajoute dans le répertoire de contact
             lignes_contenant_noeud = [
                 ligne_id for ligne_id, bus_graph in self.lignes_bus.items()
-                if any(bus_graph.exists_edge(noeud, _) for _ in self.global_graph.nodes)
+                if any(bus_graph.exists_arc(noeud, _) for _ in self.global_graph.nodes)
             ]
             if len(lignes_contenant_noeud) > 1:
                 repertoire_noeuds_contact[noeud] = lignes_contenant_noeud
@@ -127,6 +126,24 @@ class optimizer:
 
         return len(lignes_contact) == len(self.lignes_bus)
                 
+    def test_couverture_bus_2(self):
+        """
+        Vérifie si chaque nœud du graphe est accessible via au moins une ligne de bus.
+        Pour chaque ligne de bus, on vérifie si cette ligne couvre un ou plusieurs nœuds dans le graphe.
+        Retourne True si toutes les lignes de bus recouvrent l'ensemble des nœuds, sinon False.
+        """
+
+        # Crée un ensemble pour garder trace des nœuds couverts
+        noeuds_recouverts = set()
+
+        # Pour chaque ligne de bus
+        for bus_graph in self.lignes_bus.values():
+            # On parcourt les nœuds de la ligne de bus et on les ajoute à l'ensemble des nœuds recouverts
+            for noeud in bus_graph.noeuds:
+                noeuds_recouverts.add(noeud)
+
+        # On vérifie si l'ensemble des nœuds recouverts est égal à l'ensemble des nœuds du graphe global
+        return noeuds_recouverts == set(self.global_graph.nodes)
 
 
     def run(self):
@@ -151,18 +168,20 @@ class optimizer:
         print(f"DEBUG: Démarrage des lignes de bus")
         # Attribution de 2 neods pour chaque ligne de bus
         for i in range(self.nb_lignes_bus):
-            point1, point2, poids= self.global_graph.get_2_random_nodes_init()
+            point1, point2, poids= self.global_graph.get_random_node_pair()
             self.lignes_bus[i].add_node(point1, *self.global_graph.nodes[point1])
             self.lignes_bus[i].add_node(point2, *self.global_graph.nodes[point2])
-            self.lignes_bus[i].add_edge(point1, point2, poids)
+            self.lignes_bus[i].add_arc(point1, point2, poids)
         
         print(f"DEBUG: Expansion des lignes de bus...")
         # Expansion des lignes de bus
-        while not self.test_couverture_bus():
+        while not self.test_couverture_bus_2():
+            print("dbg: Expansion des lignes de bus...")
             for i in range(self.nb_lignes_bus):
                 self.lignes_bus[i].expansion(self.global_graph)
-        
-        print(f"DEBUG: Lancmeent itération")
+        self.maj_interface()
+
+        print(f"DEBUG: Lancement itération")
         for iteration in range(self.nb_iterations):
             print(f"Iteration {iteration+1}/{self.nb_iterations}")
             for i in range(self.nb_lignes_bus):
@@ -171,17 +190,17 @@ class optimizer:
                     self.acs[i].fourmis[j].deposer_pheromones()
                 self.acs[i].update_pheromones()
                 self.acs[i].update_visites()
-                self.màj_interface() # A coder
+                self.maj_interface()
 
         pass
 
-    def màj_interface(self):
+    def maj_interface(self):
         # Mise à jour de l'interface: on affiche sur chaque arc quelle ligne de bus passe par là
 
         offset = 0
         couleurs = []
         id_lignes = []
-        for ligne_bus in self.lignes_bus:
+        for id, ligne_bus in self.lignes_bus.items():
             couleurs.append(ligne_bus.couleur)
             id_lignes.append(ligne_bus.id)
             offset += 2
