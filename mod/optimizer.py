@@ -73,20 +73,21 @@ class optimizer:
         # - Pour tout couple de noeuds (arrêts) du graphe global, on veut pouvoir voyager de l'un à l'autre en prenant un (ou plusieurs) bus. Si c'est impossible (graphe disjoint), ca sert à rien de continuer
         # - On veut minimiser ce temps moyen de voyage entre deux noeuds pris au hasard
         
-        if not self.test_couverture_bus():
+        if not self.test_couverture_bus_2():
             return -1
         
         total_time = 0
         num_pairs = 0
 
+        # On parcourt tous les couples de noeuds du graphe global afin de calculer tous les temps de trajet (nécessite un graphe connexe et recouvert par les lignes de bus)
         for node1 in self.global_graph.nodes:
             for node2 in self.global_graph.nodes:
                 if node1 != node2:
                     shortest_time = float('inf')
                     for ligne_id, bus_graph in self.lignes_bus.items():
-                        if bus_graph.exists_path(node1, node2):
-                            travel_time = bus_graph.get_path_time(node1, node2)
-                            shortest_time = min(shortest_time, travel_time)
+                        travel_time = bus_graph.exists_path(node1, node2)
+                        if travel_time != -1: # exists_path renvoie -1 si le chemin n'existe pas
+                            shortest_time = min(shortest_time, travel_time) 
                     if shortest_time == float('inf'):
                         return -1  # Impossible de voyager entre deux noeuds, en théorie on a déjà vérifié ça avant
                     total_time += shortest_time

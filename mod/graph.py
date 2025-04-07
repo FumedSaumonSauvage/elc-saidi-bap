@@ -120,6 +120,24 @@ class GlobalGraph:
         self.nodes = graph_dict["noeuds"]
         self.arcs = graph_dict["arcs"]
 
+    def exists_path(self, node1, node2):
+        # implémentataion d'un DFS pour vérifier si un chemin existe entre deux noeuds
+        visited = set()
+        stack = [node1]
+        path_time = 0
+        last_known_node = node1  # Dernier noeud connu avant de partir vers le voisin
+        while stack:
+            current_node = stack.pop()
+            if current_node == node2:
+                return path_time
+            if current_node not in visited:
+                visited.add(current_node)
+                path_time += self.get_travel_time(current_node, last_known_node)  # Ajoute le temps de trajet entre les deux noeuds
+                neighbors = self.get_neighbors(current_node)
+                last_known_node = current_node  # Met à jour le dernier noeud connu
+                stack.extend(neighbors)
+        return -1 # Retourne -1 si aucun chemin n'existe entre les deux noeuds (convention)
+
     def exists_arc(self, node1, node2):
         """
             Vérifie si une arête existe entre deux nœuds dans le graphe global (ie : il existe au moins une ligne de bus qui relie les deux noeuds)
