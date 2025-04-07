@@ -187,9 +187,7 @@ class optimizer:
             for i in range(self.nb_lignes_bus):
                 for j in range(self.acs[i].nb_fourmis):
                     self.acs[i].fourmis[j].choix_noeud()
-                    self.acs[i].fourmis[j].deposer_pheromones()
-                self.acs[i].update_pheromones()
-                self.acs[i].update_visites()
+                    self.acs[i].fourmis[j].deplacement()
                 self.maj_interface()
 
         pass

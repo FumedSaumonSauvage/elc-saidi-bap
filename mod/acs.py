@@ -23,10 +23,9 @@ class Ant_Colony:
 
         # Initialisation des niveaux de phéromones pour tous les arcs
         self.pheromones = {}
-        for i in graph.get_nodes():
-            for j in graph.get_neighbors(i):
-                if (i, j) not in self.pheromones:
-                    self.pheromones[(i, j)] = tau0
+        for (n1, n2, _) in self.graph.arcs:
+            key = (min(n1, n2), max(n1, n2))
+            self.pheromones[key] = tau0
 
     def initialiser_fourmis(self):
         for fourmi in self.fourmis:
@@ -67,14 +66,12 @@ class Ant:
             max_val = -float('inf')
             next_node = None
             for node in voisins:
-                arc = self.colonie.graph.exists_arc(self.noeud_actuel, node)
-                if arc:
-                    visibility = 1.0 / arc[2]
-                    pheromone = self.colonie.pheromones.get((self.noeud_actuel, node), 0.1)
-                    val = pheromone ** self.colonie.alpha * visibility ** self.colonie.beta
-                    if val > max_val:
-                        max_val = val
-                        next_node = node
+                visibility = 1.0 / self.colonie.graph.get_travel_time(self.noeud_actuel, node)
+                pheromone = self.colonie.pheromones.get((self.noeud_actuel, node), 0.1)
+                val = pheromone ** self.colonie.alpha * visibility ** self.colonie.beta
+                if val > max_val:
+                    max_val = val
+                    next_node = node
             return next_node
         else:  # Exploration
             return random.choice(list(voisins))
@@ -85,8 +82,8 @@ class Ant:
             if next_node is None:
                 break
 
-            arc = self.colonie.graph.exists_arc(self.noeud_actuel, next_node)
-            self.tps_trajet += arc[2]
+            temps_arc = self.colonie.graph.get_travel_time(self.noeud_actuel, next_node)
+            self.tps_trajet += temps_arc
             self.noeud_actuel = next_node
             self.visited.add(next_node)
             self.path.append(next_node)
@@ -95,10 +92,17 @@ class Ant:
                 self.objectif = True
 
         if self.objectif:
+            self.mettre_a_jour_pheromones()
+        
+    def mettre_a_jour_pheromones(self):
+        # Calcule la qualité de la solution (inverse du temps de trajet)
+        if self.tps_trajet > 0:
             ratio_pheromone = self.colonie.qte_pheromones / self.tps_trajet
             for i in range(len(self.path) - 1):
                 n1 = self.path[i]
                 n2 = self.path[i + 1]
-                arc = self.colonie.graph.exists_arc(n1, n2)
-                if arc:
-                    self.colonie.pheromones[(n1, n2)] += ratio_pheromone * arc[2]
+                
+                key = (min(n1, n2), max(n1, n2))
+                qte = self.colonie.pheromones.get(key, 0.1) + ratio_pheromone * self.colonie.graph.get_travel_time(n1, n2)
+                self.colonie.pheromones[key] = qte
+
