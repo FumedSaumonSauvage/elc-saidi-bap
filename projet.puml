@@ -1,26 +1,28 @@
 @startuml projet_bap
 
 
-package tk{
+package tk {
     class Application {
         - root: tk.Tk
         - interface: InterfaceUtilisateur
         - logique: LogiqueMetier
         + __init__()
+        + passer_ref_stringvar(objet)
     }
 }
 
-class main{
+class main {
     + main()
 }
 
-package mod{
+package mod {
 
-    class IdCooker{
+    class IdCooker {
         + _instance: IdCooker
         - __new__()
         - __init__()
         + generate_id()
+        autres_fonctions()
     }
 
     class InterfaceUtilisateur {
@@ -33,6 +35,8 @@ package mod{
         + bouton_sauvegarder: tk.Button
         + bouton_charger: tk.Button
         + __init__(master: tk.Tk)
+        + start_optimisation()
+        autres_fonctions()
     }
 
     class LogiqueMetier {
@@ -55,6 +59,8 @@ package mod{
         + afficher_tous_bus()
         + afficher_legende(couleurs, lignes)
         + run_optimisation(debug: bool)
+        + verifier_graphe()
+        autres_fonctions()
     }
 
     class optimizer {
@@ -63,6 +69,7 @@ package mod{
         + global_graph: Graph
         + lignes_bus: dict
         + initialized: bool
+        + __init__()
         + initialiser_attributs(...): void
         + get_ligne_bus(id: int): BusGraph
         + get_all_lignes_bus(): dict
@@ -70,6 +77,7 @@ package mod{
         + test_couverture_bus(): bool
         + run(): void
         + màj_interface(): void
+        autres_fonctions()
     }
 
     class BusGraph {
@@ -82,6 +90,8 @@ package mod{
         + get_travel_time(node1, node2) : float
         + exists_edge(node1, node2) : bool
         + from_dict(nodes_dict, arcs_list)
+        + expansion(global_graph)
+        autres_fonctions()
     }
 
     class GlobalGraph {
@@ -93,6 +103,8 @@ package mod{
         + from_dict(graph_dict)
         + are_arcs_contingent(arc1, arc2) : bool
         + get_contingent_nodes(noeud) : list
+        + get_neighbors(node_id)
+        autres_fonctions()
     }
 
     class Ant_Colony {
@@ -107,6 +119,8 @@ package mod{
         + q0: float
         + qte_pheromones: float
         + __init__(id_colony: int, nb_fourmis: int, graph: dict, ...)
+        + initialiser_fourmis()
+        autres_fonctions()
     }
 
     class Ant {
@@ -122,14 +136,15 @@ package mod{
         + voisins(): list
         + choix_noeud(): int
         + deplacement(): void
+        autres_fonctions()
     }
 
 }
 
-Application "1" -- "1" InterfaceUtilisateur
-Application "1" -- "1" LogiqueMetier
+Application "1" -up- "1" InterfaceUtilisateur
+Application "1" -up- "1" LogiqueMetier
 InterfaceUtilisateur -- "1" tk.Canvas
-LogiqueMetier -- "1" tk.Canvas
+LogiqueMetier -down- "1" tk.Canvas
 main -up-> Application : main
 optimizer -up-> "1" optimizer : instance
 IdCooker -up-> "1" IdCooker : instance
