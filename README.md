@@ -4,6 +4,9 @@ Alexandre Louichon & Simon Hergott
 
 Intervenant: Alexandre Saïdi
 
+## Démarrage rapide
+```>$ python main.py```
+
 ## Compréhension du problème
 
 Le graphe sur lequel on circule est pondéré: à chaque arête, on associe un temps de parcours sur cette arête. Notre problème est le suivant: sachant que l'on a à disposition `k` lignes de bus, comment les agencer pour diminiuer le temps de trajet moyen entre deux points choisis aléatoirement? 
