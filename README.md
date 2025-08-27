@@ -1,4 +1,4 @@
-# Sujet 4 : Bus Allocation Problem (BAP)
+# Projet sur le Bus Allocation Problem (BAP) dans le cadre de l'UE Algorithmes Collaboratifs de Centrale Lyon
 
 Alexandre Louichon & Simon Hergott
 
